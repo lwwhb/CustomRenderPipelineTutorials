@@ -1,0 +1,20 @@
+{
+    "name": "LiteRP.Editor",
+    "rootNamespace": "LiteRP.Editor",
+    "references": [
+        "GUID:4c6d0e5560e2742469a7f0245e78632d"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
