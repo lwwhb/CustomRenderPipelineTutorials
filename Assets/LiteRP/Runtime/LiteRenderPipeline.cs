@@ -1,12 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.RenderGraphModule;
 
 namespace LiteRP
 {
     public class LiteRenderPipeline : RenderPipeline
     {
         private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); 
+        
+        private RenderGraph m_RenderGraph = null;									//使用的RenderGraph
+        private LiteRenderer m_LiteRenderer = null;								    //使用的LiteRenderer
+        private ContextContainer m_ContextData = null;								//上下文数据容器
+       
+        
+        public LiteRenderPipeline()
+        {
+            RTHandles.Initialize(Screen.width, Screen.height);
+            InitializeRenderGraph();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            CleanupRenderGraph();
+            base.Dispose(disposing);
+        }
+
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
             Render(context, new List<Camera>(cameras));
@@ -33,8 +52,22 @@ namespace LiteRP
                 //设置相机参数
                 cmd.SetupCameraProperties(camera);
                 
+                //记录并执行RenderGraph
+                RecordAndExecuteRenderGraph(context, camera, cmd);
+                
+                /*var clearFlags = camera.clearFlags;
+                bool drawSkyBox = clearFlags == CameraClearFlags.Skybox? true : false;
+                bool clearDepth = clearFlags != CameraClearFlags.Nothing;
+                bool clearColor = clearFlags == CameraClearFlags.Color? true : false;
+                
                 var backgroundColorSRGB = camera.backgroundColor;
-                cmd.ClearRenderTarget(true, true, CoreUtils.ConvertSRGBToActiveColorSpace(backgroundColorSRGB));
+                cmd.ClearRenderTarget(clearDepth, clearColor, CoreUtils.ConvertSRGBToActiveColorSpace(backgroundColorSRGB));
+
+                if (drawSkyBox)
+                {
+                    RendererList skyboxrl = context.CreateSkyboxRendererList(camera);
+                    cmd.DrawRendererList(skyboxrl);
+                }
                 
                 //Setup DrawSettings and FilterSettings
                 var sortingSettings = new SortingSettings(camera);
@@ -58,19 +91,8 @@ namespace LiteRP
                 rlp = new RendererListParams(cull, drawSettings, filterSettings);
                 rl = context.CreateRendererList(ref rlp);
                 cmd.name = "Render Transparent Objects";
-                cmd.DrawRendererList(rl);
+                cmd.DrawRendererList(rl);*/
                 
-                /*RenderGraphParameters renderGraphParams = new RenderGraphParameters()
-                {
-                    executionName = camera.name,
-                    commandBuffer = cmd,
-                    scriptableRenderContext = context,
-                    currentFrameIndex = Time.frameCount,
-                };
-                m_renderGraph.BeginRecording(renderGraphParams);
-
-                
-                m_renderGraph.EndRecordingAndExecute();*/
                 
                 //提交命令缓冲区
                 context.ExecuteCommandBuffer(cmd);
@@ -82,8 +104,51 @@ namespace LiteRP
                 //结束相机渲染
                 EndCameraRendering(context, camera);
             }
+            //RenderGraph结束帧
+            m_RenderGraph.EndFrame();
             //结束上下文渲染
             EndContextRendering(context, cameras);
+        }
+
+        private void InitializeRenderGraph()
+        {
+            m_RenderGraph = new RenderGraph("LiteRPRenderGraph");
+            m_LiteRenderer = new LiteRenderer();
+            m_ContextData = new ContextContainer();
+        }
+        private void RecordAndExecuteRenderGraph(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
+        {
+            RenderGraphParameters renderGraphParams = new RenderGraphParameters()
+            {
+                executionName = camera.name,
+                commandBuffer = cmd,
+                scriptableRenderContext = context,
+                currentFrameIndex = Time.frameCount,
+            };
+            m_RenderGraph.BeginRecording(renderGraphParams);
+            m_LiteRenderer.RecordRenderGraph(m_RenderGraph, context, camera);
+            m_RenderGraph.EndRecordingAndExecute();
+        }
+
+        private void CleanupRenderGraph()
+        {
+            if (m_ContextData != null)
+            {
+                m_ContextData.Dispose();
+                m_ContextData = null;
+            }
+            
+            if (m_LiteRenderer != null)
+            {
+                m_LiteRenderer.Dispose();
+                m_LiteRenderer = null;
+            }
+            
+            if (m_RenderGraph != null)
+            {
+                m_RenderGraph.Cleanup();
+                m_RenderGraph = null;
+            }
         }
     }
 }
