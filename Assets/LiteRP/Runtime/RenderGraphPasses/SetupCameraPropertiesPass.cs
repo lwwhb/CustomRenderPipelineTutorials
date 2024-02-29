@@ -19,7 +19,6 @@ namespace LiteRP
                        s_SetupCameraPropertiesProfilingSampler))
             {
                 passData.cameraData = cameraData;
-                builder.AllowPassCulling(false);
                 builder.AllowGlobalStateModification(true);
                 builder.SetRenderFunc((SetupCameraPropertiesPassData data, RasterGraphContext context) =>
                 {
