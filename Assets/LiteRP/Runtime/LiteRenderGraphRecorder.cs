@@ -9,6 +9,7 @@ namespace LiteRP
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             //下节课实现
+            AddDrawObjectsPass(renderGraph, frameData);
         }
     }
 }

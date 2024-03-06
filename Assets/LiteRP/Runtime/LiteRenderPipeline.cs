@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LiteRP.FrameData;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -71,11 +72,6 @@ namespace LiteRP
             //准备FrameData
             if(!PrepareFrameData(context, camera))
                 return;
-            //获取相机剔除参数，并进行剔除
-            ScriptableCullingParameters cullingParameters;
-            if (!camera.TryGetCullingParameters(out cullingParameters))
-                return;
-            CullingResults cullingResults = context.Cull(ref cullingParameters);
             //为相机创建CommandBuffer
             CommandBuffer cmd = CommandBufferPool.Get(camera.name);
             //设置相机属性参数
@@ -95,8 +91,15 @@ namespace LiteRP
 
         private bool PrepareFrameData(ScriptableRenderContext context, Camera camera)
         {
-            //下节课实现
-            return true;
+            //获取相机剔除参数，并进行剔除
+            ScriptableCullingParameters cullingParameters;
+            if (!camera.TryGetCullingParameters(out cullingParameters))
+                return false;
+            CullingResults cullingResults = context.Cull(ref cullingParameters);
+            CameraData cameraData = m_ContextContainer.GetOrCreate<CameraData>();
+            cameraData.camera = camera;
+            cameraData.cullingResults = cullingResults;
+;           return true;
         }
 
         private void RecordAndExecuteRenderGraph(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)
