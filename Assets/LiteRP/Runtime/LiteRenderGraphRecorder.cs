@@ -28,7 +28,6 @@ namespace LiteRP
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             var cameraData = frameData.Get<CameraData>();
-            var renderData = frameData.Get<RenderData>();
             CreateRenderGraphCameraRenderTargets(renderGraph, frameData);
                 
             //设置相机参数
@@ -41,7 +40,7 @@ namespace LiteRP
                     AddClearTargetsPass(renderGraph, clearFlags, cameraData.GetClearColor());
             }
             if(cameraData.camera.clearFlags == CameraClearFlags.Skybox)
-                AddDrawSkyBoxPass(renderGraph, renderData, cameraData);
+                AddDrawSkyBoxPass(renderGraph, cameraData);
             
             AddDrawObjectsPass(renderGraph, cameraData);
 #if UNITY_EDITOR

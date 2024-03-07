@@ -91,9 +91,6 @@ namespace LiteRP
 
         private bool PrepareFrameData(ScriptableRenderContext context, Camera camera)
         {
-            RenderData renderData = m_ContextData.GetOrCreate<RenderData>();
-            renderData.renderContext = context;
-            
             //Culling
             ScriptableCullingParameters cullingParams;
             if (!camera.TryGetCullingParameters(out cullingParams))

@@ -10,9 +10,9 @@ namespace LiteRP
         private static readonly ProfilingSampler s_DrawSkyBoxProfilingSampler = new ProfilingSampler("Draw SkyBox");
         internal class SkyBoxPassData
         {
-            internal RendererList skyboxRenderList;
+            internal RendererListHandle skyboxRenderListHandle;
         }
-        private void AddDrawSkyBoxPass(RenderGraph renderGraph, RenderData renderData, CameraData cameraData)
+        private void AddDrawSkyBoxPass(RenderGraph renderGraph, CameraData cameraData)
         {
             using (var builder =
                    renderGraph.AddRasterRenderPass<SkyBoxPassData>("DrawSkyBoxPass", out var passData,
@@ -23,10 +23,12 @@ namespace LiteRP
                 if(m_BackBufferDepthHandle.IsValid())
                     builder.SetRenderAttachmentDepth(m_BackBufferDepthHandle, AccessFlags.Write);
                 
-                passData.skyboxRenderList = renderData.renderContext.CreateSkyboxRendererList(cameraData.camera);
+                passData.skyboxRenderListHandle = renderGraph.CreateSkyboxRendererList(cameraData.camera);
+                builder.UseRendererList(passData.skyboxRenderListHandle);
+                
                 builder.SetRenderFunc((SkyBoxPassData data, RasterGraphContext context) =>
                 {
-                    context.cmd.DrawRendererList(data.skyboxRenderList);
+                    context.cmd.DrawRendererList(data.skyboxRenderListHandle);
                 });
             }
         }
