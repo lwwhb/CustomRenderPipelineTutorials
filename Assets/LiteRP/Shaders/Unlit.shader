@@ -2,60 +2,63 @@ Shader "LiteRP/Unlit"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (1,1,1,1)
+        [MainTexture] _BaseMap ("Texture", 2D) = "white" {}
+        [MainColor] _BaseColor ("Color", Color) = (1,1,1,1)
+        _EmissionColor("Emission Color", Color) = (0,0,0,1)
+        _Cutoff("AlphaCutout", Range(0.0, 1.0)) = 0.5
+        
+        // BlendMode
+        _Surface("__surface", Float) = 0.0
+        _Blend("__mode", Float) = 0.0
+        _Cull("__cull", Float) = 2.0
+        [ToggleUI] _AlphaClip("__clip", Float) = 0.0
+        [HideInInspector] _BlendOp("__blendop", Float) = 0.0
+        [HideInInspector] _SrcBlend("__src", Float) = 1.0
+        [HideInInspector] _DstBlend("__dst", Float) = 0.0
+        [HideInInspector] _SrcBlendAlpha("__srcA", Float) = 1.0
+        [HideInInspector] _DstBlendAlpha("__dstA", Float) = 0.0
+        [HideInInspector] _ZWrite("__zw", Float) = 1.0
+        [HideInInspector] _AlphaToMask("__alphaToMask", Float) = 0.0
+        
+        // Editmode props
+        _QueueOffset("Queue offset", Float) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { 
+            "RenderType"="Opaque" 
+            "RenderPipeline" = "LiteRP"
+        }
         LOD 100
+        
+        // Render State Commands
+        Blend [_SrcBlend][_DstBlend], [_SrcBlendAlpha][_DstBlendAlpha]
+        ZWrite [_ZWrite]
+        Cull [_Cull]
 
         Pass
         {
+            Name "Unlit"
             
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+            // Render State Commands
+            AlphaToMask[_AlphaToMask]
+            
+            HLSLPROGRAM
 
-            #include "UnityCG.cginc"
+            #pragma target 2.0
+            #pragma vertex UnlitPassVertex
+            #pragma fragment UnlitPassFragment
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+            // Material Keywords
+            #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ALPHAMODULATE_ON
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
-            };
-
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-            float4 _Color;
-
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
-                return o;
-            }
-
-            fixed4 frag (v2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv) * _Color;
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
-            }
-            ENDCG
+            //Unity defined keywords
+            #pragma multi_compile_fog               // make fog work
+            // Includes
+            #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
+            ENDHLSL
         }
     }
 }
