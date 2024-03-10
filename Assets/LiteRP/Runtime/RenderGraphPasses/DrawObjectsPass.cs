@@ -11,13 +11,11 @@ namespace LiteRP
         private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
         internal class DrawObjectsPassData
         {
-            internal TextureHandle backbufferHandle;
             internal RendererListHandle opaqueRendererListHandle;
             internal RendererListHandle transparentRendererListHandle;
         }
-        private void AddDrawObjectsPass(RenderGraph renderGraph, ContextContainer frameData)
+        private void AddDrawObjectsPass(RenderGraph renderGraph, CameraData cameraData)
         {
-            CameraData cameraData = frameData.Get<CameraData>();
             using (var builder = renderGraph.AddRasterRenderPass<DrawObjectsPassData>("Draw Objects Pass", out var passData, s_DrawObjectsProfilingSampler))
             {
                 //创建不透明对象渲染列表
@@ -36,9 +34,7 @@ namespace LiteRP
                 //RenderGraph引用不透明渲染列表
                 builder.UseRendererList(passData.transparentRendererListHandle);
                 
-                //导入BackBuffer
-                passData.backbufferHandle = renderGraph.ImportBackbuffer(BuiltinRenderTextureType.CurrentActive);
-                builder.SetRenderAttachment(passData.backbufferHandle, 0, AccessFlags.Write);
+                builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
                 
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);
