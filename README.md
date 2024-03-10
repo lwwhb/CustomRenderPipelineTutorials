@@ -6,4 +6,5 @@ Unity6的自定义渲染管线教程
 * 2月26日 Lesson3第三节 可见对象的渲染 代码已更新
 * 2月27日 Lesson4第四节 RenderGraph的基础流程 代码已更新
 * 3月3日  Lesson5第五节 RenderGraphPass基础 代码已更新
-* 3月3日  Lesson6第六节 可见对象的RenderGraphPass 代码已更新
+* 3月7日  Lesson6第六节 可见对象的RenderGraphPass 代码已更新
+* 3月10日 Lesson7第七节 RTHandleSystem基础 代码已更新
