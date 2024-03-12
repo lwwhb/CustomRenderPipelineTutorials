@@ -16,6 +16,15 @@ namespace LiteRP
             CameraData cameraData = frameData.Get<CameraData>();
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
+            CameraClearFlags clearFlags = cameraData.camera.clearFlags;
+            if(clearFlags != CameraClearFlags.Nothing)
+            {
+                AddClearRenderTargetPass(renderGraph, cameraData);
+            }
+            if(clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
+            {
+                AddDrawSkyBoxPass(renderGraph, cameraData);
+            }
             AddDrawObjectsPass(renderGraph, cameraData);
         }
 

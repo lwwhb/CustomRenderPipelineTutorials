@@ -7,7 +7,7 @@ namespace LiteRP
 {
     public partial class LiteRenderGraphRecorder
     {
-        private static readonly ProfilingSampler s_DrawObjectsProfilingSampler = new ProfilingSampler("Draw Objects");
+        private static readonly ProfilingSampler s_DrawObjectsProfilingSampler = new ProfilingSampler("DrawObjectsPass");
         private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
         internal class DrawObjectsPassData
         {
@@ -33,17 +33,19 @@ namespace LiteRP
                 passData.transparentRendererListHandle = renderGraph.CreateRendererList(transparentRendererDesc);
                 //RenderGraph引用不透明渲染列表
                 builder.UseRendererList(passData.transparentRendererListHandle);
-                
-                builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
-                
+
+
+                if (m_BackbufferColorHandle.IsValid())
+                    builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
+
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);
                 
-                builder.SetRenderFunc((DrawObjectsPassData passData, RasterGraphContext context)=> 
+                builder.SetRenderFunc((DrawObjectsPassData data, RasterGraphContext context)=> 
                 {
                     //调用渲染指令绘制
-                    context.cmd.DrawRendererList(passData.opaqueRendererListHandle);
-                    context.cmd.DrawRendererList(passData.transparentRendererListHandle);
+                    context.cmd.DrawRendererList(data.opaqueRendererListHandle);
+                    context.cmd.DrawRendererList(data.transparentRendererListHandle);
                 });
             }
         }
