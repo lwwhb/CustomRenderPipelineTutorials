@@ -7,7 +7,7 @@ namespace LiteRP
 {
     public partial class LiteRenderGraphRecorder
     {
-        private static readonly ProfilingSampler s_DrawObjectsProfilingSampler = new ProfilingSampler("DrawObjectsPass");
+        private static readonly ProfilingSampler s_DrawObjectsProfilingSampler = new ProfilingSampler("DrawOpaqueObjectsPass");
         private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
         internal class DrawObjectsPassData
         {
