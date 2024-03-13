@@ -9,6 +9,8 @@ namespace LiteRP
 {
     public partial class LiteRenderGraphRecorder : IRenderGraphRecorder, IDisposable
     {
+        private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
+        
         private TextureHandle m_BackbufferColorHandle = TextureHandle.nullHandle;
         private RTHandle m_TargetColorHandle = null;
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
@@ -21,11 +23,12 @@ namespace LiteRP
             {
                 AddClearRenderTargetPass(renderGraph, cameraData);
             }
+            AddDrawOpaqueObjectsPass(renderGraph, cameraData);
             if(clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
             {
                 AddDrawSkyBoxPass(renderGraph, cameraData);
             }
-            AddDrawObjectsPass(renderGraph, cameraData);
+            AddDrawTransparentObjectsPass(renderGraph, cameraData);
         }
 
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
