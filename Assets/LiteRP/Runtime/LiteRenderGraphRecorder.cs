@@ -51,6 +51,7 @@ namespace LiteRP
             importInfoColor.volumeDepth = 1;
             importInfoColor.msaaSamples = 1;
             importInfoColor.format = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
+            importInfoColor.bindMS = false;
             
             m_BackbufferColorHandle = renderGraph.ImportTexture(m_TargetColorHandle, importInfoColor, importBackbufferColorParams);
         }
