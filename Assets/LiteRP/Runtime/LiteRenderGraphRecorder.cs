@@ -35,6 +35,11 @@ namespace LiteRP
                 AddDrawSkyBoxPass(renderGraph, cameraData);
             }
             AddDrawTransparentObjectsPass(renderGraph, cameraData);
+            //临时写法
+/*#if UNITY_EDITOR
+            if (cameraData.camera.cameraType == CameraType.SceneView)
+                AddEditorRenderTargetPass(renderGraph);
+#endif*/
         }
 
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
@@ -52,15 +57,16 @@ namespace LiteRP
                 RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetDepthHandle, targetDepthId);
 
             Color clearColor = cameraData.GetClearColor();
-            RTClearFlags clearFlags = cameraData.GetClearFlags();
+            bool clearBackbufferOnFirstUse = !renderGraph.nativeRenderPassesEnabled;
+            bool discardColorBackbufferOnLastUse = !renderGraph.nativeRenderPassesEnabled;
             
             ImportResourceParams importBackbufferColorParams = new ImportResourceParams();
-            importBackbufferColorParams.clearOnFirstUse = true;
+            importBackbufferColorParams.clearOnFirstUse = clearBackbufferOnFirstUse;
             importBackbufferColorParams.clearColor = clearColor;
-            importBackbufferColorParams.discardOnLastUse = true;
+            importBackbufferColorParams.discardOnLastUse = discardColorBackbufferOnLastUse;
             
             ImportResourceParams importBackbufferDepthParams = new ImportResourceParams();
-            importBackbufferDepthParams.clearOnFirstUse = true;
+            importBackbufferDepthParams.clearOnFirstUse = clearBackbufferOnFirstUse;
             importBackbufferDepthParams.clearColor = clearColor;
             importBackbufferDepthParams.discardOnLastUse = true;
 #if UNITY_EDITOR
