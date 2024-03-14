@@ -18,11 +18,14 @@ namespace LiteRP
     
     public static class LiteRPUtils
     {
-        public static bool IsNativeRenderPassesEnabled()
+        public static bool IsSupportsNativeRenderPassRenderGraphCompiler()
         {
             return SystemInfo.graphicsDeviceType != GraphicsDeviceType.Direct3D12
-                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES3 // GLES doesn't support backbuffer MSAA resolve with the NRP API
-                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore;
+                   && SystemInfo.graphicsDeviceType !=
+                   GraphicsDeviceType.OpenGLES3 // GLES doesn't support backbuffer MSAA resolve with the NRP API
+                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore
+                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.PlayStation5; // UUM-56295
+
         }
 
         //创建渲染纹理描述

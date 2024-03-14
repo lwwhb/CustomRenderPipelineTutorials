@@ -22,9 +22,12 @@ namespace LiteRP
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
             CameraClearFlags clearFlags = cameraData.camera.clearFlags;
-            if(clearFlags != CameraClearFlags.Nothing)
+            if (!renderGraph.nativeRenderPassesEnabled)
             {
-                AddClearRenderTargetPass(renderGraph, cameraData);
+                if(clearFlags != CameraClearFlags.Nothing)
+                {
+                    AddClearRenderTargetPass(renderGraph, cameraData);
+                }
             }
             AddDrawOpaqueObjectsPass(renderGraph, cameraData);
             if(clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
