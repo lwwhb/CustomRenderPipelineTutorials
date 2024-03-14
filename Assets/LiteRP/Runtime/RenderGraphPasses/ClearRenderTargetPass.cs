@@ -24,6 +24,8 @@ namespace LiteRP
                
                 if(m_BackbufferColorHandle.IsValid())
                     builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
+                if (m_BackbufferDepthHandle.IsValid())
+                    builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Write);
                 
                 builder.AllowPassCulling(false);
                 
