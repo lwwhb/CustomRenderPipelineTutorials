@@ -44,8 +44,12 @@ namespace LiteRP
 
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
         {
-            RenderTargetIdentifier targetColorId = BuiltinRenderTextureType.CameraTarget;
-            RenderTargetIdentifier targetDepthId = BuiltinRenderTextureType.Depth;
+            var cameraTargetTexture = cameraData.camera.targetTexture;
+            bool isBuiltInTexture = (cameraTargetTexture == null);
+            
+            RenderTargetIdentifier targetColorId = isBuiltInTexture? BuiltinRenderTextureType.CameraTarget : new RenderTargetIdentifier(cameraTargetTexture);
+            RenderTargetIdentifier targetDepthId = isBuiltInTexture ? BuiltinRenderTextureType.Depth : new RenderTargetIdentifier(cameraTargetTexture);
+            
             if(m_TargetColorHandle == null)
                 m_TargetColorHandle = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
             else if(m_TargetColorHandle.nameID != targetColorId)
@@ -77,17 +81,32 @@ namespace LiteRP
             
             bool colorRT_sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear);
             RenderTargetInfo importInfoColor = new RenderTargetInfo();
-            importInfoColor.width = Screen.width;
-            importInfoColor.height = Screen.height;
-            importInfoColor.volumeDepth = 1;
-            importInfoColor.msaaSamples = 1;
-            importInfoColor.format = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
-            importInfoColor.bindMS = false;
-            
             RenderTargetInfo importInfoDepth = new RenderTargetInfo();
-            importInfoDepth = importInfoColor;
-            importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
-            
+            if (isBuiltInTexture)
+            {
+                importInfoColor.width = Screen.width;
+                importInfoColor.height = Screen.height;
+                importInfoColor.volumeDepth = 1;
+                importInfoColor.msaaSamples = 1;
+                importInfoColor.format =
+                    GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
+                importInfoColor.bindMS = false;
+                
+                importInfoDepth = importInfoColor;
+                importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
+            }
+            else
+            {
+                importInfoColor.width = cameraTargetTexture.width;
+                importInfoColor.height = cameraTargetTexture.height;
+                importInfoColor.volumeDepth = cameraTargetTexture.volumeDepth;
+                importInfoColor.msaaSamples = cameraTargetTexture.antiAliasing;
+                importInfoColor.format = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
+
+                importInfoDepth = importInfoColor;
+                importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
+            }
+
             m_BackbufferColorHandle = renderGraph.ImportTexture(m_TargetColorHandle, importInfoColor, importBackbufferColorParams);
             m_BackbufferDepthHandle = renderGraph.ImportTexture(m_TargetDepthHandle, importInfoDepth, importBackbufferDepthParams);
         }
