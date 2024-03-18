@@ -8,6 +8,7 @@ namespace LiteRP
     {
         protected override RenderPipeline CreatePipeline()
         {
+            Screen.SetMSAASamples(1);
             return new LiteRenderPipeline();
         }
     }

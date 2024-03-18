@@ -20,8 +20,6 @@ namespace LiteRP
         {
             using (var builder = renderGraph.AddRasterRenderPass<DrawObjectsPassData>("Draw Objects Pass", out var passData, s_DrawObjectsProfilingSampler))
             {
-                builder.UseAllGlobalTextures(true);
-                
                 if (m_BackBufferColorHandle.IsValid())
                 {
                     passData.colorHandle = m_BackBufferColorHandle;
