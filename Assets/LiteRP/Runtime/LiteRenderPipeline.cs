@@ -28,6 +28,7 @@ namespace LiteRP
         {
             RTHandles.Initialize(Screen.width, Screen.height);
             m_RenderGraph = new RenderGraph("LiteRPRenderGraph");
+            m_RenderGraph.nativeRenderPassesEnabled = LiteRPUtils.CanNativeRenderPassesEnabled();
             m_LiteRenderGraphRecorder = new LiteRenderGraphRecorder();
             m_ContextContainer = new ContextContainer();
         }
@@ -74,7 +75,7 @@ namespace LiteRP
             if(!PrepareFrameData(context, camera))
                 return;
             //为相机创建CommandBuffer
-            CommandBuffer cmd = CommandBufferPool.Get(camera.name);
+            CommandBuffer cmd = CommandBufferPool.Get();
             //记录并执行渲染图
             RecordAndExecuteRenderGraph(context, camera, cmd);
             //提交命令缓冲区

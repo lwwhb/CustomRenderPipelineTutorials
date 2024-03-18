@@ -19,7 +19,7 @@ namespace LiteRP
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
             CameraClearFlags clearFlags = cameraData.camera.clearFlags;
-            if(clearFlags != CameraClearFlags.Nothing)
+            if(!renderGraph.nativeRenderPassesEnabled && clearFlags != CameraClearFlags.Nothing)
             {
                 AddClearRenderTargetPass(renderGraph, cameraData);
             }
@@ -36,13 +36,17 @@ namespace LiteRP
             RenderTargetIdentifier targetColorId = BuiltinRenderTextureType.CameraTarget;
             if(m_TargetColorHandle == null)
                 m_TargetColorHandle = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
+            else if(m_TargetColorHandle.nameID != targetColorId)
+                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetColorHandle, targetColorId);
+
 
             Color cameraBackgroundColor = CoreUtils.ConvertSRGBToActiveColorSpace(cameraData.camera.backgroundColor);
-            
+            bool clearOnFirstUse = !renderGraph.nativeRenderPassesEnabled;
+            bool discardOnLastUse = !renderGraph.nativeRenderPassesEnabled;
             ImportResourceParams importBackbufferColorParams = new ImportResourceParams();
-            importBackbufferColorParams.clearOnFirstUse = true;
+            importBackbufferColorParams.clearOnFirstUse = clearOnFirstUse;
             importBackbufferColorParams.clearColor = cameraBackgroundColor;
-            importBackbufferColorParams.discardOnLastUse = false;
+            importBackbufferColorParams.discardOnLastUse = discardOnLastUse;
             
             bool colorRT_sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear);
             RenderTargetInfo importInfoColor = new RenderTargetInfo();
