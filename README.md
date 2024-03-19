@@ -9,3 +9,5 @@ Unity6的自定义渲染管线教程
 * 3月7日  Lesson6第六节 可见对象的RenderGraphPass 代码已更新
 * 3月10日 Lesson7第七节 RTHandleSystem基础 代码已更新
 * 3月13日 Lesson8第八节 CameraClearFlags的设置 代码已更新
+* 3月18日 Lesson9第九节 RenderGraph下开启NativeRenderPass后的Runtime适配
+* 3月20日 Lesson10第十节 LiteRP第一次Profiling
