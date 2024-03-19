@@ -9,6 +9,7 @@ namespace LiteRP
     {
         protected override RenderPipeline CreatePipeline()
         {
+            QualitySettings.antiAliasing = 1;
             return new LiteRenderPipeline();
         }
     }

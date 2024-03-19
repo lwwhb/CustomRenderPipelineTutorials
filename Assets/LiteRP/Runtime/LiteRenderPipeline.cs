@@ -92,8 +92,7 @@ namespace LiteRP
         private bool PrepareFrameData(ScriptableRenderContext context, Camera camera)
         {
             //获取相机剔除参数，并进行剔除
-            ScriptableCullingParameters cullingParameters;
-            if (!camera.TryGetCullingParameters(out cullingParameters))
+            if (!camera.TryGetCullingParameters(out var cullingParameters))
                 return false;
             CullingResults cullingResults = context.Cull(ref cullingParameters);
             CameraData cameraData = m_ContextContainer.GetOrCreate<CameraData>();
