@@ -36,16 +36,19 @@ namespace LiteRP
             }
             AddDrawTransparentObjectsPass(renderGraph, cameraData);
             //临时写法
-/*#if UNITY_EDITOR
-            if (cameraData.camera.cameraType == CameraType.SceneView)
-                AddEditorRenderTargetPass(renderGraph);
-#endif*/
+#if UNITY_EDITOR
+            //if (cameraData.camera.cameraType == CameraType.SceneView)
+            //    AddEditorRenderTargetPass(renderGraph);
+            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PreImageEffects);
+            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PostImageEffects);
+#endif
         }
 
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
         {
             var cameraTargetTexture = cameraData.camera.targetTexture;
             bool isBuiltInTexture = (cameraTargetTexture == null);
+            bool isCameraTargetOffscreenDepth = !isBuiltInTexture && cameraData.camera.targetTexture.format == RenderTextureFormat.Depth;
             
             RenderTargetIdentifier targetColorId = isBuiltInTexture? BuiltinRenderTextureType.CameraTarget : new RenderTargetIdentifier(cameraTargetTexture);
             RenderTargetIdentifier targetDepthId = isBuiltInTexture ? BuiltinRenderTextureType.Depth : new RenderTargetIdentifier(cameraTargetTexture);
@@ -63,6 +66,7 @@ namespace LiteRP
             Color clearColor = cameraData.GetClearColor();
             bool clearBackbufferOnFirstUse = !renderGraph.nativeRenderPassesEnabled;
             bool discardColorBackbufferOnLastUse = !renderGraph.nativeRenderPassesEnabled;
+            bool discardDepthBackbufferOnLastUse = !isCameraTargetOffscreenDepth;
             
             ImportResourceParams importBackbufferColorParams = new ImportResourceParams();
             importBackbufferColorParams.clearOnFirstUse = clearBackbufferOnFirstUse;
@@ -72,7 +76,7 @@ namespace LiteRP
             ImportResourceParams importBackbufferDepthParams = new ImportResourceParams();
             importBackbufferDepthParams.clearOnFirstUse = clearBackbufferOnFirstUse;
             importBackbufferDepthParams.clearColor = clearColor;
-            importBackbufferDepthParams.discardOnLastUse = true;
+            importBackbufferDepthParams.discardOnLastUse = discardDepthBackbufferOnLastUse;
 #if UNITY_EDITOR
             // on TBDR GPUs like Apple M1/M2, we need to preserve the backbuffer depth for overlay cameras in Editor for Gizmos
             if (cameraData.camera.cameraType == CameraType.SceneView)
