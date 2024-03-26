@@ -35,11 +35,8 @@ namespace LiteRP
             AddDrawTransparentObjectsPass(renderGraph, cameraData);
             
 #if UNITY_EDITOR
-            if (cameraData.camera.cameraType == CameraType.SceneView)
-            {
-                AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PreImageEffects);
-                AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PostImageEffects);
-            }            
+            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PreImageEffects);
+            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PostImageEffects);
 #endif
         }
 

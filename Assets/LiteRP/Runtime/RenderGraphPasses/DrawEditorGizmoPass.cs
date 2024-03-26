@@ -19,7 +19,9 @@ namespace LiteRP
             if(!Handles.ShouldRenderGizmos() || cameraData.camera.sceneViewFilterMode == Camera.SceneViewFilterMode.ShowFiltered)
                 return;
             
-            using (var builder = renderGraph.AddRasterRenderPass<DrawEditorGizmoPassData>("Draw Editor Gizmo Pass", out var passData,
+            bool renderPreGizmos = (gizmoSubset == GizmoSubset.PreImageEffects);
+            var passName = renderPreGizmos ? "Draw Pre Gizmos Pass" : "Draw Post Gizmos Pass";
+            using (var builder = renderGraph.AddRasterRenderPass<DrawEditorGizmoPassData>(passName, out var passData,
                        s_DrawEditorGizmoProfilingSampler))
             {
                 if (m_BackbufferColorHandle.IsValid())
