@@ -16,18 +16,16 @@ namespace LiteRP
         
         private TextureHandle m_BackbufferDepthHandle = TextureHandle.nullHandle;
         private RTHandle m_TargetDepthHandle = null;
+
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             CameraData cameraData = frameData.Get<CameraData>();
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
             CameraClearFlags clearFlags = cameraData.camera.clearFlags;
-            if (!renderGraph.nativeRenderPassesEnabled)
+            if(!renderGraph.nativeRenderPassesEnabled && clearFlags != CameraClearFlags.Nothing)
             {
-                if(clearFlags != CameraClearFlags.Nothing)
-                {
-                    AddClearRenderTargetPass(renderGraph, cameraData);
-                }
+                AddClearRenderTargetPass(renderGraph, cameraData);
             }
             AddDrawOpaqueObjectsPass(renderGraph, cameraData);
             if(clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
@@ -35,10 +33,8 @@ namespace LiteRP
                 AddDrawSkyBoxPass(renderGraph, cameraData);
             }
             AddDrawTransparentObjectsPass(renderGraph, cameraData);
-            //临时写法
+            
 #if UNITY_EDITOR
-            //if (cameraData.camera.cameraType == CameraType.SceneView)
-            //    AddEditorRenderTargetPass(renderGraph);
             AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PreImageEffects);
             AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PostImageEffects);
 #endif
@@ -46,35 +42,41 @@ namespace LiteRP
 
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
         {
-            var cameraTargetTexture = cameraData.camera.targetTexture;
-            bool isBuiltInTexture = (cameraTargetTexture == null);
-            bool isCameraTargetOffscreenDepth = !isBuiltInTexture && cameraData.camera.targetTexture.format == RenderTextureFormat.Depth;
+            var targetTexture = cameraData.camera.targetTexture;
+            var cameraTargetTexture = targetTexture;
+            bool isBuildInTexture = (cameraTargetTexture == null);
+            bool isCameraTargetOffscreenDepth = !isBuildInTexture && targetTexture.format == RenderTextureFormat.Depth;
             
-            RenderTargetIdentifier targetColorId = isBuiltInTexture? BuiltinRenderTextureType.CameraTarget : new RenderTargetIdentifier(cameraTargetTexture);
-            RenderTargetIdentifier targetDepthId = isBuiltInTexture ? BuiltinRenderTextureType.Depth : new RenderTargetIdentifier(cameraTargetTexture);
-            
+            RenderTargetIdentifier targetColorId = isBuildInTexture
+                ? BuiltinRenderTextureType.CameraTarget
+                : new RenderTargetIdentifier(cameraTargetTexture);
             if(m_TargetColorHandle == null)
                 m_TargetColorHandle = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
             else if(m_TargetColorHandle.nameID != targetColorId)
                 RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetColorHandle, targetColorId);
-            
-            if (m_TargetDepthHandle == null)
-                m_TargetDepthHandle = RTHandles.Alloc(targetDepthId, "Backbuffer depth");
-            else if (m_TargetDepthHandle.nameID != targetDepthId)
-                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetDepthHandle, targetDepthId);
 
+            RenderTargetIdentifier targetDepthId = isBuildInTexture
+                ? BuiltinRenderTextureType.Depth
+                : new RenderTargetIdentifier(cameraTargetTexture);
+            if(m_TargetDepthHandle == null)
+                m_TargetDepthHandle = RTHandles.Alloc((RenderTargetIdentifier)targetDepthId, "BackBuffer depth");
+            else if(m_TargetDepthHandle.nameID != targetDepthId)
+                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetDepthHandle, targetDepthId);
+            
             Color clearColor = cameraData.GetClearColor();
-            bool clearBackbufferOnFirstUse = !renderGraph.nativeRenderPassesEnabled;
+            RTClearFlags clearFlags = cameraData.GetClearFlags();
+            
+            bool clearOnFirstUse = !renderGraph.nativeRenderPassesEnabled;
             bool discardColorBackbufferOnLastUse = !renderGraph.nativeRenderPassesEnabled;
             bool discardDepthBackbufferOnLastUse = !isCameraTargetOffscreenDepth;
             
             ImportResourceParams importBackbufferColorParams = new ImportResourceParams();
-            importBackbufferColorParams.clearOnFirstUse = clearBackbufferOnFirstUse;
+            importBackbufferColorParams.clearOnFirstUse = clearOnFirstUse;
             importBackbufferColorParams.clearColor = clearColor;
             importBackbufferColorParams.discardOnLastUse = discardColorBackbufferOnLastUse;
             
             ImportResourceParams importBackbufferDepthParams = new ImportResourceParams();
-            importBackbufferDepthParams.clearOnFirstUse = clearBackbufferOnFirstUse;
+            importBackbufferDepthParams.clearOnFirstUse = clearOnFirstUse;
             importBackbufferDepthParams.clearColor = clearColor;
             importBackbufferDepthParams.discardOnLastUse = discardDepthBackbufferOnLastUse;
 #if UNITY_EDITOR
@@ -86,16 +88,15 @@ namespace LiteRP
             bool colorRT_sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear);
             RenderTargetInfo importInfoColor = new RenderTargetInfo();
             RenderTargetInfo importInfoDepth = new RenderTargetInfo();
-            if (isBuiltInTexture)
+            if (isBuildInTexture)
             {
                 importInfoColor.width = Screen.width;
                 importInfoColor.height = Screen.height;
                 importInfoColor.volumeDepth = 1;
                 importInfoColor.msaaSamples = 1;
-                importInfoColor.format =
-                    GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
+                importInfoColor.format = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
                 importInfoColor.bindMS = false;
-                
+            
                 importInfoDepth = importInfoColor;
                 importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
             }
@@ -106,11 +107,12 @@ namespace LiteRP
                 importInfoColor.volumeDepth = cameraTargetTexture.volumeDepth;
                 importInfoColor.msaaSamples = cameraTargetTexture.antiAliasing;
                 importInfoColor.format = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, colorRT_sRGB);
-
+                importInfoColor.bindMS = false;
+            
                 importInfoDepth = importInfoColor;
                 importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
             }
-
+            
             m_BackbufferColorHandle = renderGraph.ImportTexture(m_TargetColorHandle, importInfoColor, importBackbufferColorParams);
             m_BackbufferDepthHandle = renderGraph.ImportTexture(m_TargetDepthHandle, importInfoDepth, importBackbufferDepthParams);
         }

@@ -9,7 +9,7 @@ namespace LiteRP
     {
         protected override RenderPipeline CreatePipeline()
         {
-            Screen.SetMSAASamples(1); //默认为2，强制设置为1
+            QualitySettings.antiAliasing = 1;
             return new LiteRenderPipeline();
         }
     }
