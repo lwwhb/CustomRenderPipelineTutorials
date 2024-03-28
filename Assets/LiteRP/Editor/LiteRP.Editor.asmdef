@@ -2,7 +2,12 @@
     "name": "LiteRP.Editor",
     "rootNamespace": "LiteRP.Editor",
     "references": [
-        "GUID:4c6d0e5560e2742469a7f0245e78632d"
+        "GUID:4c6d0e5560e2742469a7f0245e78632d",
+        "GUID:3eae0364be2026648bf74846acb8a731",
+        "GUID:2a69708d171a17043a9d0ad45f205cfe",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95",
+        "GUID:69257879134bba646869b21467b3338d",
+        "GUID:be0903cd8e1546f498710afdc59db5eb"
     ],
     "includePlatforms": [
         "Editor"
