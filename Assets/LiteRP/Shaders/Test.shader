@@ -13,5 +13,5 @@ Shader "LiteRP/Test"
         }
     }
     
-    //CustomEditor "LiteRP.Editor.LiteRPShaderGUI"
+    CustomEditor "LiteRP.Editor.LiteRPShaderGUI"
 }
