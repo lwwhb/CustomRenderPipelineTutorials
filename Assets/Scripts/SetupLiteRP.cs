@@ -9,11 +9,11 @@ public class SetupLiteRP : MonoBehaviour
     public RenderPipelineAsset currentPipeLineAsset;
     private void OnEnable()
     {
-        GraphicsSettings.renderPipelineAsset = currentPipeLineAsset;
+        GraphicsSettings.defaultRenderPipeline = currentPipeLineAsset;
     }
 
     private void OnValidate()
     {
-        GraphicsSettings.renderPipelineAsset = currentPipeLineAsset;
+        GraphicsSettings.defaultRenderPipeline = currentPipeLineAsset;
     }
 }
