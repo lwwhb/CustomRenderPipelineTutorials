@@ -2,9 +2,10 @@
 #define LITERP_UNLIT_FORWARD_PASS_INCLUDED
 
 #include "SrpCoreShaderLibraryIncludes.hlsl"
+#include "UnlitInput.hlsl"
 #include "ShaderVariablesFunctions.hlsl"
 #include "SurfaceData.hlsl"
-#include "UnlitInput.hlsl"
+
 
 struct Attributes
 {

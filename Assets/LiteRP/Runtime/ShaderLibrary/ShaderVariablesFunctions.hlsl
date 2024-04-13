@@ -115,8 +115,7 @@ half AlphaClip(half alpha, half cutoff)
 real AlphaDiscard(real alpha, real cutoff, real offset = real(0.0))
 {
 #if defined(_ALPHATEST_ON)
-    if (IsAlphaDiscardEnabled())
-        alpha = AlphaClip(alpha, cutoff + offset);
+    alpha = AlphaClip(alpha, cutoff + offset);
 #endif
 
     return alpha;

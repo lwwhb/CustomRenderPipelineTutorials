@@ -2,6 +2,7 @@ Shader "LiteRP/Unlit"
 {
     Properties
     {
+        // Shader 属性
         [MainTexture] _BaseMap ("Texture", 2D) = "white" {}
         [MainColor] _BaseColor ("Color", Color) = (1,1,1,1)
         _EmissionColor("Emission Color", Color) = (0,0,0,1)
@@ -25,6 +26,7 @@ Shader "LiteRP/Unlit"
     }
     SubShader
     {
+        // Shader 代码
         Tags { 
             "RenderType"="Opaque" 
             "RenderPipeline" = "LiteRP"
@@ -56,9 +58,16 @@ Shader "LiteRP/Unlit"
 
             //Unity defined keywords
             #pragma multi_compile_fog               // make fog work
+            
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
+            
             // Includes
             #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
             ENDHLSL
         }
     }
+    
+    CustomEditor "LiteRP.Editor.UnlitShaderGUI"
 }

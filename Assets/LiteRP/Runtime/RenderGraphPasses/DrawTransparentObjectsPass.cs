@@ -32,9 +32,11 @@ namespace LiteRP
 
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);
+                builder.AllowGlobalStateModification(true);
                 
                 builder.SetRenderFunc((DrawTransparentObjectsPassData data, RasterGraphContext context)=> 
                 {
+                    context.cmd.SetGlobalFloat(ShaderPropertyId.alphaToMaskAvailable, 0.0f);
                     //调用渲染指令绘制
                     context.cmd.DrawRendererList(data.transparentRendererListHandle);
                 });

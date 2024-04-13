@@ -1,64 +1,104 @@
 using System;
 using UnityEditor;
-using UnityEditor.Rendering;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.Rendering;
+using RenderQueue = UnityEngine.Rendering.RenderQueue;
+using SurfaceType = LiteRP.Editor.LiteRPShaderGUI.SurfaceType;
+using BlendMode = LiteRP.Editor.LiteRPShaderGUI.BlendMode;
+using RenderFace = LiteRP.Editor.LiteRPShaderGUI.RenderFace;
+using ZWriteControl = LiteRP.Editor.LiteRPShaderGUI.ZWriteControl;
+using ZTestMode = LiteRP.Editor.LiteRPShaderGUI.ZTestMode;
+using QueueControl = LiteRP.Editor.LiteRPShaderGUI.QueueControl;
 
 namespace LiteRP.Editor
 {
-    public abstract class LiteShaderGUI : ShaderGUI
+    internal static class LiteRPShaderProperty
     {
-        public enum SurfaceType
-        {
-            Opaque,
-            Transparent
-        }
-        
-        public enum BlendMode
-        {
-            Alpha,   
-            Premultiply, 
-            Additive,
-            Multiply
-        }
-        internal static class LiteRPShaderProperty
-        {
-            public static readonly string SurfaceType = "_Surface";
-            public static readonly string BlendMode = "_Blend";
-            public static readonly string AlphaClip = "_AlphaClip";
-            public static readonly string AlphaToMask = "_AlphaToMask";
-            public static readonly string SrcBlend = "_SrcBlend";
-            public static readonly string DstBlend = "_DstBlend";
-            public static readonly string SrcBlendAlpha = "_SrcBlendAlpha";
-            public static readonly string DstBlendAlpha = "_DstBlendAlpha";
-            public static readonly string BlendModePreserveSpecular = "_BlendModePreserveSpecular";
-            public static readonly string ZWrite = "_ZWrite";
-            public static readonly string CullMode = "_Cull";
-            public static readonly string CastShadows = "_CastShadows";
-            public static readonly string ReceiveShadows = "_ReceiveShadows";
-            public static readonly string QueueOffset = "_QueueOffset";
-        }
-        
-        protected MaterialEditor m_MaterialEditor { get; set; }
-        
-        public override void OnGUI(MaterialEditor materialEditorIn, MaterialProperty[] properties)
-        {
-            if (materialEditorIn == null)
-                throw new ArgumentNullException("materialEditorIn");
+        public static readonly string SpecularWorkflowMode = "_WorkflowMode";
+        public static readonly string SurfaceType = "_Surface";
+        public static readonly string BlendMode = "_Blend";
+        public static readonly string AlphaClip = "_AlphaClip";
+        public static readonly string AlphaToMask = "_AlphaToMask";
+        public static readonly string SrcBlend = "_SrcBlend";
+        public static readonly string DstBlend = "_DstBlend";
+        public static readonly string SrcBlendAlpha = "_SrcBlendAlpha";
+        public static readonly string DstBlendAlpha = "_DstBlendAlpha";
+        public static readonly string BlendModePreserveSpecular = "_BlendModePreserveSpecular";
+        public static readonly string ZWrite = "_ZWrite";
+        public static readonly string CullMode = "_Cull";
+        public static readonly string CastShadows = "_CastShadows";
+        public static readonly string ReceiveShadows = "_ReceiveShadows";
+        public static readonly string QueueOffset = "_QueueOffset";
             
-            if (!(RenderPipelineManager.currentPipeline is LiteRenderPipeline))
-            {
-                CoreEditorUtils.DrawFixMeBox("Editing LiteRP materials is only supported when an LiteRP asset is assigned in the Graphics Settings", MessageType.Warning, "Open",
-                    () => SettingsService.OpenProjectSettings("Project/Graphics"));
-            }
-            else
-            {
-                m_MaterialEditor = materialEditorIn;
-                OnMaterialGUI(materialEditorIn, properties);
-            }
-        }
+        // for ShaderGraph shaders only
+        public static readonly string ZTest = "_ZTest";
+        public static readonly string ZWriteControl = "_ZWriteControl";
+        public static readonly string QueueControl = "_QueueControl";
+        public static readonly string AddPrecomputedVelocity = "_AddPrecomputedVelocity";
+            
+        // Global Illumination requires some properties to be named specifically:
+        public static readonly string EmissionMap = "_EmissionMap";
+        public static readonly string EmissionColor = "_EmissionColor";
+    }
+    public static class LiteRPShaderHelper
+    {
+        internal static event Action<Material> ShadowCasterPassEnabledChanged;
+        public static void SetMaterialKeywords(Material material, Action<Material> shadingModelFunc = null, Action<Material> shaderFunc = null)
+        {
+            UpdateMaterialSurfaceOptions(material, automaticRenderQueue: true);
 
-        internal static void SetupMaterialBlendMode(Material material)
+            // Setup double sided GI based on Cull state
+            if (material.HasProperty(LiteRPShaderProperty.CullMode))
+                material.doubleSidedGI = (RenderFace)material.GetFloat(LiteRPShaderProperty.CullMode) != RenderFace.Front;
+
+            // Emission
+            if (material.HasProperty(LiteRPShaderProperty.EmissionColor))
+                MaterialEditor.FixupEmissiveFlag(material);
+
+            bool shouldEmissionBeEnabled =
+                (material.globalIlluminationFlags & MaterialGlobalIlluminationFlags.EmissiveIsBlack) == 0;
+
+            CoreUtils.SetKeyword(material, ShaderKeywordStrings._EMISSION, shouldEmissionBeEnabled);
+
+            // Normal Map
+            if (material.HasProperty("_BumpMap"))
+                CoreUtils.SetKeyword(material, ShaderKeywordStrings._NORMALMAP, material.GetTexture("_BumpMap"));
+            
+
+            // Shader specific keyword functions
+            shadingModelFunc?.Invoke(material);
+            shaderFunc?.Invoke(material);
+        }
+        public static void SetupMaterialBlendMode(Material material)
+        {
+            SetupMaterialBlendModeInternal(material, out int renderQueue);
+
+            // apply automatic render queue
+            if (renderQueue != material.renderQueue)
+                material.renderQueue = renderQueue;
+        }
+        
+        public static bool GetAutomaticQueueControlSetting(Material material)
+        {
+            // If a Shader Graph material doesn't yet have the queue control property,
+            // we should not engage automatic behavior until the shader gets reimported.
+            bool automaticQueueControl = !material.IsShaderGraph();
+            if (material.HasProperty(LiteRPShaderProperty.QueueControl))
+            {
+                var queueControl = material.GetFloat(LiteRPShaderProperty.QueueControl);
+                if (queueControl < 0.0f)
+                {
+                    // The property was added with a negative value, indicating it needs to be validated for this material
+                    UpdateMaterialRenderQueueControl(material);
+                }
+                automaticQueueControl = (material.GetFloat(LiteRPShaderProperty.QueueControl) == (float)QueueControl.Auto);
+            }
+            return automaticQueueControl;
+        }
+        
+        
+        internal static void SetupMaterialBlendModeInternal(Material material, out int automaticRenderQueue)
         {
             bool alphaClip = false;
             if (material.HasProperty(LiteRPShaderProperty.AlphaClip))
@@ -183,11 +223,73 @@ namespace LiteRP.Editor
             // 处理Shader中改变的RenderQueue
             if (material.HasProperty(LiteRPShaderProperty.QueueOffset))
                 renderQueue += (int)material.GetFloat(LiteRPShaderProperty.QueueOffset);
-
-            if (renderQueue != material.renderQueue)
-                material.renderQueue = renderQueue;
+            
+            automaticRenderQueue = renderQueue;
         }
+        internal static void UpdateMaterialSurfaceOptions(Material material, bool automaticRenderQueue)
+        {
+            // Setup blending - consistent across all Universal RP shaders
+            SetupMaterialBlendModeInternal(material, out int renderQueue);
 
+            // apply automatic render queue
+            if (automaticRenderQueue && (renderQueue != material.renderQueue))
+                material.renderQueue = renderQueue;
+
+            bool isShaderGraph = material.IsShaderGraph();
+
+            // Cast Shadows
+            bool castShadows = true;
+            if (material.HasProperty(LiteRPShaderProperty.CastShadows))
+            {
+                castShadows = (material.GetFloat(LiteRPShaderProperty.CastShadows) != 0.0f);
+            }
+            else
+            {
+                if (isShaderGraph)
+                {
+                    // Lit.shadergraph or Unlit.shadergraph, but no material control defined
+                    // enable the pass in the material, so shader can decide...
+                    castShadows = true;
+                }
+                else
+                {
+                    // Lit.shader or Unlit.shader -- set based on transparency
+                    castShadows = IsOpaque(material);
+                }
+            }
+
+            string shadowCasterPass = "ShadowCaster";
+            if (material.GetShaderPassEnabled(shadowCasterPass) != castShadows)
+            {
+                material.SetShaderPassEnabled(shadowCasterPass, castShadows);
+                ShadowCasterPassEnabledChanged?.Invoke(material);
+            }
+
+            // Receive Shadows
+            if (material.HasProperty(LiteRPShaderProperty.ReceiveShadows))
+                CoreUtils.SetKeyword(material, ShaderKeywordStrings._RECEIVE_SHADOWS_OFF, material.GetFloat(LiteRPShaderProperty.ReceiveShadows) == 0.0f);
+        }
+        
+        internal static void UpdateMaterialRenderQueueControl(Material material)
+        {
+            //
+            // Render Queue Control handling
+            //
+            // Check for a raw render queue (the actual serialized setting - material.renderQueue has already been converted)
+            // setting of -1, indicating that the material property should be inherited from the shader.
+            // If we find this, add a new property "render queue control" set to 0 so we will
+            // always know to follow the surface type of the material (this matches the hand-written behavior)
+            // If we find another value, add the the property set to 1 so we will know that the
+            // user has explicitly selected a render queue and we should not override it.
+            //
+            bool isShaderGraph = material.IsShaderGraph(); // Non-shadergraph materials use automatic behavior
+            int rawRenderQueue = MaterialAccess.ReadMaterialRawRenderQueue(material);
+            if (!isShaderGraph || rawRenderQueue == -1)
+                material.SetFloat(LiteRPShaderProperty.QueueControl, (float)QueueControl.Auto); // Automatic behavior - surface type override
+            else
+                material.SetFloat(LiteRPShaderProperty.QueueControl, (float)QueueControl.UserOverride); // User has selected explicit render queue
+        }
+        
         internal static void SetMaterialSrcDstBlendProperties(Material material, UnityEngine.Rendering.BlendMode srcBlend, UnityEngine.Rendering.BlendMode dstBlend)
         {
             if (material.HasProperty(LiteRPShaderProperty.SrcBlend))
@@ -216,13 +318,17 @@ namespace LiteRP.Editor
             if (material.HasProperty(LiteRPShaderProperty.DstBlendAlpha))
                 material.SetFloat(LiteRPShaderProperty.DstBlendAlpha, (float)dstBlendAlpha);
         }
-        
         internal static void SetMaterialZWriteProperty(Material material, bool zwriteEnabled)
         {
             if (material.HasProperty(LiteRPShaderProperty.ZWrite))
                 material.SetFloat(LiteRPShaderProperty.ZWrite, zwriteEnabled ? 1.0f : 0.0f);
         }
-
-        protected abstract void OnMaterialGUI(MaterialEditor materialEditor, MaterialProperty[] props);
+        internal static bool IsOpaque(Material material)
+        {
+            bool opaque = true;
+            if (material.HasProperty(LiteRPShaderProperty.SurfaceType))
+                opaque = ((SurfaceType)material.GetFloat(LiteRPShaderProperty.SurfaceType) == SurfaceType.Opaque);
+            return opaque;
+        }
     }
 }
