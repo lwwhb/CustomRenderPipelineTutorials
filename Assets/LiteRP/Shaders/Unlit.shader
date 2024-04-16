@@ -5,7 +5,8 @@ Shader "LiteRP/Unlit"
         // Shader 属性
         [MainTexture] _BaseMap ("Texture", 2D) = "white" {}
         [MainColor] _BaseColor ("Color", Color) = (1,1,1,1)
-        _EmissionColor("Emission Color", Color) = (0,0,0,1)
+        [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,1)
+        [NoScaleOffset]_EmissionMap("Emission Map", 2D) = "white" {}
         _Cutoff("AlphaCutout", Range(0.0, 1.0)) = 0.5
         
         // BlendMode
@@ -55,6 +56,7 @@ Shader "LiteRP/Unlit"
             #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ALPHAMODULATE_ON
+            #pragma shader_feature_local_fragment _EMISSION
 
             //Unity defined keywords
             #pragma multi_compile_fog               // make fog work

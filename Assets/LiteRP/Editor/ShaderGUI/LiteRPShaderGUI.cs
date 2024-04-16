@@ -212,6 +212,9 @@ namespace LiteRP.Editor
             // 绘制BaseMap
             LiteRPShaderGUIHelper.DrawBaseProperties(m_MaterialEditor, m_BaseMapProperty, m_BaseColorProperty);
             LiteRPShaderGUIHelper.DrawTileOffset(m_MaterialEditor, m_BaseMapProperty);
+            
+            // 绘制EmissionMap
+            LiteRPShaderGUIHelper.DrawEmissionProperties(m_MaterialEditor, m_EmissionMapProperty, m_EmissionColorProperty, true);
         }
         
         // 绘制advanced options GUI

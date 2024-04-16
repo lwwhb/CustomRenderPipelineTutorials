@@ -6,21 +6,16 @@ namespace LiteRP.Editor
 {
     internal class UnlitShaderGUI : LiteRPShaderGUI
     {
-        //材质改变时的回调
+        // 材质改变时的回调
         public override void ValidateMaterial(Material material)
         {
             LiteRPShaderHelper.SetMaterialKeywords(material);
         }
-        
+        // 替换Shader时回调
         public override void AssignNewShaderToMaterial(Material material, Shader oldShader, Shader newShader)
         {
             if (material == null)
                 throw new ArgumentNullException("material");
-            
-            if (material.HasProperty("_Emission"))
-            {
-                material.SetColor("_EmissionColor", material.GetColor("_Emission"));
-            }
 
             // 清空材质关键字来刷新
             material.shaderKeywords = null;

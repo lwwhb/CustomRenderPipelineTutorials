@@ -3,9 +3,8 @@
 
 #include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "UnlitInput.hlsl"
-#include "ShaderVariablesFunctions.hlsl"
 #include "SurfaceData.hlsl"
-
+#include "SurfaceFunctions.hlsl"
 
 struct Attributes
 {
@@ -39,15 +38,10 @@ Varyings UnlitPassVertex(Attributes input)
 void UnlitPassFragment(Varyings input, out half4 outColor : SV_Target0)
 {
     half2 uv = input.uv;
-    half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);
+    half4 texColor = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     half3 color = texColor.rgb * _BaseColor.rgb;
-    #if defined(_EMISSION)
-    half3 emission = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, uv).rgb * _EmissionColor.rgb;
-    #else
-    half3 emission = half3(0, 0, 0);
-    #endif
+    half3 emission = SampleEmission(uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
     half alpha = texColor.a * _BaseColor.a;
-
     alpha = AlphaDiscard(alpha, _Cutoff);
     color = AlphaModulate(color, alpha);
 
