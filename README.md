@@ -12,3 +12,5 @@ Unity6的自定义渲染管线教程
 * 3月18日 Lesson9第九节 RenderGraph下开启NativeRenderPass后的Runtime适配
 * 3月20日 Lesson10第十节 LiteRP第一次Profiling
 * 3月26日 Lesson11第十一节 RenderGraph下开启NativeRenderPass后SceneView的适配
+* 3月29日 Lesson12第十二节 自定义Material Inspector
+* 4月17日 Lesson13第十三节 自定义Unlit Shader GUI
