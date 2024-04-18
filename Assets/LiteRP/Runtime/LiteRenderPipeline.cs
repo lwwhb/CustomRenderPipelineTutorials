@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LiteRP.FrameData;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -14,14 +15,21 @@ namespace LiteRP
         private LiteRenderGraphRecorder m_LiteRenderGraphRecorder = null; //渲染图记录器
         private ContextContainer m_ContextContainer = null; //上下文容器
 
-        public LiteRenderPipeline()
+        public LiteRenderPipeline(LiteRPAsset asset)
         {
+            InitializeSettings(asset);
             InitializeRenderGraph();
         }
         protected override void Dispose(bool disposing)
         {
             CleanupRenderGraph();
             base.Dispose(disposing);
+        }
+        //初始化Settings
+        private void InitializeSettings(LiteRPAsset asset)
+        {
+            GraphicsSettings.useScriptableRenderPipelineBatching = asset.useSRPBatcher;   
+            QualitySettings.antiAliasing = asset.antiAliasing;
         }
         //初始化渲染图
         private void InitializeRenderGraph()

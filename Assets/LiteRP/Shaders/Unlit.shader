@@ -64,12 +64,11 @@ Shader "LiteRP/Unlit"
             // GPU Instancing
             #pragma multi_compile_instancing
             #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
-            
             // Includes
             #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
             ENDHLSL
         }
     }
-    
+    Fallback "Hidden/LiteRP/FallbackError"
     CustomEditor "LiteRP.Editor.UnlitShaderGUI"
 }

@@ -3,7 +3,8 @@
     "rootNamespace": "LiteRP",
     "references": [
         "GUID:df380645f10b7bc4b97d4f5eb6303d95",
-        "GUID:69257879134bba646869b21467b3338d"
+        "GUID:69257879134bba646869b21467b3338d",
+        "GUID:4fd6538c1c56b409fb53fdf0183170ec"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

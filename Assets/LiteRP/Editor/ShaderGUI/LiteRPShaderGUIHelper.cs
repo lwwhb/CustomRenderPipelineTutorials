@@ -13,7 +13,7 @@ using ZTestMode = LiteRP.Editor.LiteRPShaderGUI.ZTestMode;
 using QueueControl = LiteRP.Editor.LiteRPShaderGUI.QueueControl;
 namespace LiteRP.Editor
 {
-    public static class LiteRPShaderGUIHelper 
+    internal static class LiteRPShaderGUIHelper 
     {
         internal class Styles
         {

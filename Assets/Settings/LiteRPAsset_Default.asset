@@ -12,3 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 277a360eaf42d4c46b0d2862b83281bf, type: 3}
   m_Name: LiteRPAsset_Default
   m_EditorClassIdentifier: 
+  m_UseSRPBatcher: 1
+  m_GPUResidentDrawerMode: 0
+  m_SmallMeshScreenPercentage: 0
+  m_GPUResidentDrawerEnableOcclusionCullingInCameras: 0
+  m_AntiAliasing: 1

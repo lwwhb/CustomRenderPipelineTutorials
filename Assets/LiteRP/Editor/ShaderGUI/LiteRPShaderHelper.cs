@@ -41,7 +41,7 @@ namespace LiteRP.Editor
         public static readonly string EmissionMap = "_EmissionMap";
         public static readonly string EmissionColor = "_EmissionColor";
     }
-    public static class LiteRPShaderHelper
+    internal static class LiteRPShaderHelper
     {
         internal static event Action<Material> ShadowCasterPassEnabledChanged;
         public static void SetMaterialKeywords(Material material, Action<Material> shadingModelFunc = null, Action<Material> shaderFunc = null)
