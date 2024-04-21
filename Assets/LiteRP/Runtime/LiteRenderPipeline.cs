@@ -17,7 +17,7 @@ namespace LiteRP
 
         public LiteRenderPipeline(LiteRPAsset asset)
         {
-            InitializeSettings(asset);
+            InitializeRPSettings(asset);
             InitializeRenderGraph();
         }
         protected override void Dispose(bool disposing)
@@ -26,7 +26,7 @@ namespace LiteRP
             base.Dispose(disposing);
         }
         //初始化Settings
-        private void InitializeSettings(LiteRPAsset asset)
+        private void InitializeRPSettings(LiteRPAsset asset)
         {
             GraphicsSettings.useScriptableRenderPipelineBatching = asset.useSRPBatcher;   
             QualitySettings.antiAliasing = asset.antiAliasing;
