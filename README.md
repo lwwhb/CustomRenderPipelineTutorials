@@ -14,3 +14,4 @@ Unity6的自定义渲染管线教程
 * 3月26日 Lesson11第十一节 RenderGraph下开启NativeRenderPass后SceneView的适配
 * 3月29日 Lesson12第十二节 自定义Material Inspector
 * 4月17日 Lesson13第十三节 自定义Unlit Shader GUI
+* 4月23日 Lesson14第十四节 自定义RenderPipeline Assets Editor实现SrpBatcher功能配置
