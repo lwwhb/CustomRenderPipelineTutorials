@@ -68,6 +68,45 @@ Shader "LiteRP/Unlit"
             #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
             ENDHLSL
         }
+
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
+            // -------------------------------------
+            // Includes
+            #include "../Runtime/ShaderLibrary/ShadowCasterPass.hlsl"
+            
+            ENDHLSL
+        }
     }
     Fallback "Hidden/LiteRP/FallbackError"
     CustomEditor "LiteRP.Editor.UnlitShaderGUI"

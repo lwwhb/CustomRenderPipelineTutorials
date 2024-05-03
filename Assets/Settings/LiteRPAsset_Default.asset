@@ -17,3 +17,19 @@ MonoBehaviour:
   m_SmallMeshScreenPercentage: 0
   m_GPUResidentDrawerEnableOcclusionCullingInCameras: 0
   m_AntiAliasing: 1
+  m_ConservativeEnclosingSphere: 0
+  m_NumIterationsEnclosingSphere: 64
+  m_AdditionalLightsPerObjectLimit: 4
+  m_MainLightShadowEnabled: 1
+  m_MainLightShadowmapResolution: 2048
+  m_MainLightShadowDistance: 50
+  m_MainLightShadowCascadesCount: 4
+  m_MainLightCascade2Split: 0.25
+  m_MainLightCascade3Split: {x: 0.1, y: 0.3}
+  m_MainLightCascade4Split: {x: 0.067, y: 0.2, z: 0.467}
+  m_MainLightCascadeBorder: 0.2
+  m_MainLightShadowDepthBias: 1
+  m_MainLightShadowNormalBias: 1
+  m_AnyShadowsSupported: 1
+  m_SoftShadowsSupported: 1
+  m_SoftShadowQuality: 2

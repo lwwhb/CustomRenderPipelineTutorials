@@ -5,7 +5,7 @@ using UnityEngine.Rendering.RenderGraphModule;
 
 namespace LiteRP
 {
-    public partial class LiteRenderGraphRecorder
+    public partial class LiteRPRenderGraphRecorder
     {
         private static readonly ProfilingSampler s_DrawOpaqueObjectsProfilingSampler = new ProfilingSampler("DrawOpaqueObjectsPass");
         internal class DrawOpaqueObjectsPassData

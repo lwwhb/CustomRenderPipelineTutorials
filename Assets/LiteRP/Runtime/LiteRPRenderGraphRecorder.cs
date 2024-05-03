@@ -7,21 +7,35 @@ using UnityEngine.Rendering.RenderGraphModule;
 
 namespace LiteRP
 {
-    public partial class LiteRenderGraphRecorder : IRenderGraphRecorder, IDisposable
+    public partial class LiteRPRenderGraphRecorder : IRenderGraphRecorder, IDisposable
     {
         private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
         
         private TextureHandle m_BackbufferColorHandle = TextureHandle.nullHandle;
-        private RTHandle m_TargetColorHandle = null;
+        private RTHandle m_ColorTarget = null;
         
         private TextureHandle m_BackbufferDepthHandle = TextureHandle.nullHandle;
-        private RTHandle m_TargetDepthHandle = null;
+        private RTHandle m_DepthTarget = null;
+
+        internal LiteRPRenderGraphRecorder()
+        {
+            InitializeMainLightShadowMapPass();
+        }
 
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             CameraData cameraData = frameData.Get<CameraData>();
+            LightData lightData = frameData.Get<LightData>();
+            ShadowData shadowData = frameData.Get<ShadowData>();
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
+
+            if (NeedMainLightShadowPass(cameraData, lightData, shadowData))
+            {
+                AddDrawMainLightShadowPass(renderGraph, cameraData, lightData, shadowData);
+                AddSetupCameraPropertiesPass(renderGraph, cameraData);
+            }
+
             CameraClearFlags clearFlags = cameraData.camera.clearFlags;
             if(!renderGraph.nativeRenderPassesEnabled && clearFlags != CameraClearFlags.Nothing)
             {
@@ -50,18 +64,18 @@ namespace LiteRP
             RenderTargetIdentifier targetColorId = isBuildInTexture
                 ? BuiltinRenderTextureType.CameraTarget
                 : new RenderTargetIdentifier(cameraTargetTexture);
-            if(m_TargetColorHandle == null)
-                m_TargetColorHandle = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
-            else if(m_TargetColorHandle.nameID != targetColorId)
-                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetColorHandle, targetColorId);
+            if(m_ColorTarget == null)
+                m_ColorTarget = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
+            else if(m_ColorTarget.nameID != targetColorId)
+                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_ColorTarget, targetColorId);
 
             RenderTargetIdentifier targetDepthId = isBuildInTexture
                 ? BuiltinRenderTextureType.Depth
                 : new RenderTargetIdentifier(cameraTargetTexture);
-            if(m_TargetDepthHandle == null)
-                m_TargetDepthHandle = RTHandles.Alloc((RenderTargetIdentifier)targetDepthId, "BackBuffer depth");
-            else if(m_TargetDepthHandle.nameID != targetDepthId)
-                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_TargetDepthHandle, targetDepthId);
+            if(m_DepthTarget == null)
+                m_DepthTarget = RTHandles.Alloc((RenderTargetIdentifier)targetDepthId, "BackBuffer depth");
+            else if(m_DepthTarget.nameID != targetDepthId)
+                RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_DepthTarget, targetDepthId);
             
             Color clearColor = cameraData.GetClearColor();
             RTClearFlags clearFlags = cameraData.GetClearFlags();
@@ -113,14 +127,18 @@ namespace LiteRP
                 importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
             }
             
-            m_BackbufferColorHandle = renderGraph.ImportTexture(m_TargetColorHandle, importInfoColor, importBackbufferColorParams);
-            m_BackbufferDepthHandle = renderGraph.ImportTexture(m_TargetDepthHandle, importInfoDepth, importBackbufferDepthParams);
+            m_BackbufferColorHandle = renderGraph.ImportTexture(m_ColorTarget, importInfoColor, importBackbufferColorParams);
+            m_BackbufferDepthHandle = renderGraph.ImportTexture(m_DepthTarget, importInfoDepth, importBackbufferDepthParams);
         }
-
+        
+        
+        
         public void Dispose()
         {
-            RTHandles.Release(m_TargetColorHandle);
-            RTHandles.Release(m_TargetDepthHandle);
+            ReleaseMainLightShadowMapPass();
+            
+            RTHandles.Release(m_ColorTarget);
+            RTHandles.Release(m_DepthTarget);
             GC.SuppressFinalize(this);
         }
     }

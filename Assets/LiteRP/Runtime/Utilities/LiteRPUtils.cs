@@ -1,10 +1,12 @@
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace LiteRP
 {
-    //HDR颜色缓冲区精度定义
+    // HDR颜色缓冲区精度定义
     public enum HDRColorBufferPrecision
     {
         /// <summary> Typically R11G11B10f for faster rendering. Recommend for mobile.
@@ -16,20 +18,32 @@ namespace LiteRP
         _64Bits,
     }
     
-    public static class LiteRPUtils
+    // 对NativeArrary的Unsafe扩展
+    static class NativeArrayExtensions
     {
-        public static bool IsSupportsNativeRenderPassRenderGraphCompiler()
+        /// <summary>
+        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
+        /// </summary>
+        public static unsafe ref T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
         {
-            return SystemInfo.graphicsDeviceType != GraphicsDeviceType.Direct3D12
-                   && SystemInfo.graphicsDeviceType !=
-                   GraphicsDeviceType.OpenGLES3 // GLES doesn't support backbuffer MSAA resolve with the NRP API
-                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore
-                   && SystemInfo.graphicsDeviceType != GraphicsDeviceType.PlayStation5; // UUM-56295
-
+            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafeReadOnlyPtr(), index);
         }
 
+        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), index);
+        }
+    }
+    
+    public static class LiteRPUtils
+    {
+        //全局获取管线Asset
+        internal static LiteRPAsset asset
+        {
+            get => GraphicsSettings.currentRenderPipeline as LiteRPAsset;
+        }
         //创建渲染纹理描述
-        static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, int msaaSamples)
+        internal static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, int msaaSamples)
         {
             RenderTextureDescriptor desc;
             if (camera.targetTexture == null)
@@ -67,7 +81,7 @@ namespace LiteRP
             return desc;
         }
         
-        static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale,
+        internal static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale,
             bool isHdrEnabled, HDRColorBufferPrecision requestHDRColorBufferPrecision, int msaaSamples, bool needsAlpha)
         {
             int scaledWidth = (int)((float)camera.pixelWidth * renderScale);
