@@ -6,6 +6,16 @@
 
 #define MAX_SHADOW_CASCADES 4
 
+#if !defined(_RECEIVE_SHADOWS_OFF)
+    #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+        #define MAIN_LIGHT_CALCULATE_SHADOWS
+
+        #if defined(_MAIN_LIGHT_SHADOWS)
+            #define REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR
+        #endif
+    #endif
+#endif
+
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);
 
 // GLES3 causes a performance regression in some devices when using CBUFFER.

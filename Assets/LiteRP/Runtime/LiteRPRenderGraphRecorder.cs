@@ -30,9 +30,9 @@ namespace LiteRP
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
 
-            if (NeedMainLightShadowPass(cameraData, lightData, shadowData))
+            if (NeedMainLightShadowMapPass(cameraData, lightData, shadowData))
             {
-                AddDrawMainLightShadowPass(renderGraph, cameraData, lightData, shadowData);
+                AddDrawMainLightShadowMapPass(renderGraph, cameraData, lightData, shadowData);
                 AddSetupCameraPropertiesPass(renderGraph, cameraData);
             }
 

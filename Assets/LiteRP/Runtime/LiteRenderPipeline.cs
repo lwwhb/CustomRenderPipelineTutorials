@@ -19,8 +19,15 @@ namespace LiteRP
         public LiteRenderPipeline(LiteRPAsset asset)
         {
             m_Asset = asset;
+            // 初始化管线属性
             InitializeRPSettings();
+            // 初始化RTHandle System
+            RTHandles.Initialize(Screen.width, Screen.height);
+            // 初始化全局Shader关键字
+            ShaderGlobalKeywords.InitializeShaderGlobalKeywords();
+            // 初始化RenderGraph
             InitializeRenderGraph();
+            
         }
         protected override void Dispose(bool disposing)
         {
@@ -36,7 +43,6 @@ namespace LiteRP
         //初始化渲染图
         private void InitializeRenderGraph()
         {
-            RTHandles.Initialize(Screen.width, Screen.height);
             m_RenderGraph = new RenderGraph("LiteRPRenderGraph");
             m_RenderGraph.nativeRenderPassesEnabled = LiteRPRenderGraphUtils.IsSupportsNativeRenderPassRenderGraphCompiler();
             m_LiteRPRenderGraphRecorder = new LiteRPRenderGraphRecorder();

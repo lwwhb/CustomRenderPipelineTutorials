@@ -9,14 +9,12 @@ namespace LiteRP
     {
         private static readonly ProfilingSampler s_DrawMainLightShadowMapProfilingSampler = new ProfilingSampler("DrawMainLightShadowMapPass");
         private const string k_MainLightShadowmapTextureName = "_MainLightShadowmapTexture";
-        private const string k_EmptyShadowMapName = "_EmptyLightShadowmapTexture";
         private const int k_MaxCascades = 4;
         private const int k_ShadowmapBufferBits = 16;
         
         
         private TextureHandle m_MainLightShadowHandle = TextureHandle.nullHandle;
         private RTHandle m_MainLightShadowmapTexture = null;
-        private RTHandle m_EmptyLightShadowmapTexture = null;
         
         Matrix4x4[] m_MainLightShadowMatrices;
         ShadowSliceData[] m_CascadeSlices;
@@ -49,11 +47,9 @@ namespace LiteRP
             m_MainLightShadowMatrices = new Matrix4x4[k_MaxCascades + 1];
             m_CascadeSlices = new ShadowSliceData[k_MaxCascades];
             m_CascadeSplitDistances = new Vector4[k_MaxCascades];
-            
-            m_EmptyLightShadowmapTexture = ShadowUtils.AllocShadowRT(1, 1, k_ShadowmapBufferBits, 1, 0, name: k_EmptyShadowMapName);
         }
 
-        private bool NeedMainLightShadowPass(CameraData cameraData, LightData lightData, ShadowData shadowData)
+        private bool NeedMainLightShadowMapPass(CameraData cameraData, LightData lightData, ShadowData shadowData)
         {
             // 判断管线设置中是否开启
             if (!shadowData.mainLightShadowEnabled)
@@ -103,10 +99,9 @@ namespace LiteRP
         private void ReleaseMainLightShadowMapPass()
         {
             m_MainLightShadowmapTexture?.Release();
-            m_EmptyLightShadowmapTexture?.Release();
         }
         
-        private void AddDrawMainLightShadowPass(RenderGraph renderGraph, CameraData cameraData, LightData lightData, ShadowData shadowData)
+        private void AddDrawMainLightShadowMapPass(RenderGraph renderGraph, CameraData cameraData, LightData lightData, ShadowData shadowData)
         {
             using (var builder = renderGraph.AddRasterRenderPass<DrawMainLightShadowMapPassData>("Draw Main Light ShadowMap Pass", out var passData,
                        s_DrawMainLightShadowMapProfilingSampler))

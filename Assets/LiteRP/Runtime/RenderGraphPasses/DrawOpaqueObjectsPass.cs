@@ -28,6 +28,10 @@ namespace LiteRP
                     builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
                 if (m_BackbufferDepthHandle.IsValid())
                     builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Write);
+                
+                //设置主光源阴影
+                if (m_MainLightShadowHandle.IsValid())
+                    builder.UseTexture(m_MainLightShadowHandle, AccessFlags.Read);
 
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);

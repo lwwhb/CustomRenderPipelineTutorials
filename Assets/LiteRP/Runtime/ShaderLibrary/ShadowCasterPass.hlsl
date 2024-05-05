@@ -4,6 +4,7 @@
 #include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "ShaderVariablesFunctions.hlsl"
 #include "Shadow.hlsl"
+#include "UnlitInput.hlsl"
 
 
 float3 _LightDirection;
