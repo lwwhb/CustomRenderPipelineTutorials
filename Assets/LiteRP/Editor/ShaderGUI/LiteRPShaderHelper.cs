@@ -30,6 +30,11 @@ namespace LiteRP.Editor
         public static readonly string CastShadows = "_CastShadows";
         public static readonly string ReceiveShadows = "_ReceiveShadows";
         public static readonly string QueueOffset = "_QueueOffset";
+        public static readonly string Cutoff = "_Cutoff";
+        public static readonly string BaseMap = "_BaseMap";
+        public static readonly string BaseColor = "_BaseColor";
+        
+        public static readonly string NormalMap = "_BumpMap";
             
         // for ShaderGraph shaders only
         public static readonly string ZTest = "_ZTest";
@@ -59,11 +64,11 @@ namespace LiteRP.Editor
             bool shouldEmissionBeEnabled =
                 (material.globalIlluminationFlags & MaterialGlobalIlluminationFlags.EmissiveIsBlack) == 0;
 
-            CoreUtils.SetKeyword(material, ShaderKeywordStrings._EMISSION, shouldEmissionBeEnabled);
+            CoreUtils.SetKeyword(material, ShaderKeywordStrings.Emission, shouldEmissionBeEnabled);
 
             // Normal Map
-            if (material.HasProperty("_BumpMap"))
-                CoreUtils.SetKeyword(material, ShaderKeywordStrings._NORMALMAP, material.GetTexture("_BumpMap"));
+            if (material.HasProperty(LiteRPShaderProperty.NormalMap))
+                CoreUtils.SetKeyword(material, ShaderKeywordStrings.NormalMap, material.GetTexture(LiteRPShaderProperty.NormalMap));
             
 
             // Shader specific keyword functions
@@ -103,14 +108,14 @@ namespace LiteRP.Editor
             bool alphaClip = false;
             if (material.HasProperty(LiteRPShaderProperty.AlphaClip))
                 alphaClip = material.GetFloat(LiteRPShaderProperty.AlphaClip) >= 0.5;
-            CoreUtils.SetKeyword(material, ShaderKeywordStrings._ALPHATEST_ON, alphaClip);
+            CoreUtils.SetKeyword(material, ShaderKeywordStrings.AlphaTestOn, alphaClip);
             int renderQueue = material.shader.renderQueue;
             material.SetOverrideTag("RenderType", "");
             if (material.HasProperty(LiteRPShaderProperty.SurfaceType))
             {
                 SurfaceType surfaceType = (SurfaceType)material.GetFloat(LiteRPShaderProperty.SurfaceType);
                 bool zwrite = false;
-                CoreUtils.SetKeyword(material, ShaderKeywordStrings._SURFACE_TYPE_TRANSPARENT, surfaceType == SurfaceType.Transparent);
+                CoreUtils.SetKeyword(material, ShaderKeywordStrings.SurfaceTypeTransparent, surfaceType == SurfaceType.Transparent);
                 bool alphaToMask = false;
                 if (surfaceType == SurfaceType.Opaque)
                 {
@@ -128,8 +133,8 @@ namespace LiteRP.Editor
 
                     SetMaterialSrcDstBlendProperties(material, UnityEngine.Rendering.BlendMode.One, UnityEngine.Rendering.BlendMode.Zero);
                     zwrite = true;
-                    material.DisableKeyword(ShaderKeywordStrings._ALPHAPREMULTIPLY_ON);
-                    material.DisableKeyword(ShaderKeywordStrings._ALPHAMODULATE_ON);
+                    material.DisableKeyword(ShaderKeywordStrings.AlphaPreMultiplyOn);
+                    material.DisableKeyword(ShaderKeywordStrings.AlphaModulateOn);
                 }
                 else 
                 {
@@ -198,8 +203,8 @@ namespace LiteRP.Editor
                     SetMaterialSrcDstBlendProperties(material, srcBlendRGB, dstBlendRGB, // RGB
                         srcBlendA, dstBlendA); // Alpha
 
-                    CoreUtils.SetKeyword(material, ShaderKeywordStrings._ALPHAPREMULTIPLY_ON, preserveSpecular);
-                    CoreUtils.SetKeyword(material, ShaderKeywordStrings._ALPHAMODULATE_ON, blendMode == BlendMode.Multiply);
+                    CoreUtils.SetKeyword(material, ShaderKeywordStrings.AlphaPreMultiplyOn, preserveSpecular);
+                    CoreUtils.SetKeyword(material, ShaderKeywordStrings.AlphaModulateOn, blendMode == BlendMode.Multiply);
 
                     // General Transparent Material Settings
                     material.SetOverrideTag("RenderType", "Transparent");
@@ -267,7 +272,7 @@ namespace LiteRP.Editor
 
             // Receive Shadows
             if (material.HasProperty(LiteRPShaderProperty.ReceiveShadows))
-                CoreUtils.SetKeyword(material, ShaderKeywordStrings._RECEIVE_SHADOWS_OFF, material.GetFloat(LiteRPShaderProperty.ReceiveShadows) == 0.0f);
+                CoreUtils.SetKeyword(material, ShaderKeywordStrings.ReceiveShadowsOff, material.GetFloat(LiteRPShaderProperty.ReceiveShadows) == 0.0f);
         }
         
         internal static void UpdateMaterialRenderQueueControl(Material material)

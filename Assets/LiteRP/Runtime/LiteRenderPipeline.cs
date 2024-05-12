@@ -9,8 +9,6 @@ namespace LiteRP
 {
     public class LiteRenderPipeline : RenderPipeline
     {
-        private static readonly ShaderTagId s_ShaderTagId = new ShaderTagId("SRPDefaultUnlit");
-
         private LiteRPAsset m_Asset;
         private RenderGraph m_RenderGraph = null; //渲染图
         private LiteRPRenderGraphRecorder m_LiteRPRenderGraphRecorder = null; //渲染图记录器
@@ -146,7 +144,7 @@ namespace LiteRP
             //初始化阴影帧数据
             ShadowData shadowData = m_ContextContainer.GetOrCreate<ShadowData>();
             // maxShadowDistance is set to 0.0f when the Render Shadows toggle is disabled on the camera
-            bool cameraRenderShadows = true;//cameraData.maxShadowDistance > 0.0f;
+            bool cameraRenderShadows = true;//cameraData.maxShadowDistance > 0.0f;      //注意条件
             shadowData.mainLightShadowEnabled = m_Asset.mainLightShadowEnabled;
             shadowData.supportMainLightShadow = SystemInfo.supportsShadows && shadowData.mainLightShadowEnabled && cameraRenderShadows;
             shadowData.mainLightShadowDistance = cullingParameters.shadowDistance;
@@ -160,6 +158,9 @@ namespace LiteRP
             ShadowUtils.CreateShadowAtlasAndCullShadowCasters(shadowData, ref cameraData.cullingResults, ref context);
             
             var mainLightIndex = lightData.mainLightIndex;
+            if (mainLightIndex < 0)     //注意这里小于0的情况
+                return true;
+            
             VisibleLight vl = visibleLights[mainLightIndex];
             Light light = vl.light;
             shadowData.supportMainLightShadow &= mainLightIndex != -1

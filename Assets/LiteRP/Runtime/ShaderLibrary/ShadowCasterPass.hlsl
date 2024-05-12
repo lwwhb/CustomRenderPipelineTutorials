@@ -4,7 +4,6 @@
 #include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "ShaderVariablesFunctions.hlsl"
 #include "Shadow.hlsl"
-#include "UnlitInput.hlsl"
 
 
 float3 _LightDirection;
@@ -62,7 +61,7 @@ half4 ShadowPassFragment(Varyings input) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(input);
 
     #if defined(_ALPHATEST_ON)
-    Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
+        Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
     #endif
 
     return 0;

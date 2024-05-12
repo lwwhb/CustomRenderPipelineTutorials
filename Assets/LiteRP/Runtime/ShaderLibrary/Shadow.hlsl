@@ -3,20 +3,46 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
+#include "ShaderVariablesInput.hlsl"
+#include "ShaderInputData.hlsl"
+#include "SurfaceFunctions.hlsl"
 
 #define MAX_SHADOW_CASCADES 4
 
 #if !defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
         #define MAIN_LIGHT_CALCULATE_SHADOWS
-
-        #if defined(_MAIN_LIGHT_SHADOWS)
-            #define REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR
-        #endif
     #endif
 #endif
 
+#if defined(UNITY_DOTS_INSTANCING_ENABLED) && !defined(USE_LEGACY_LIGHTMAPS)
+// ^ GPU-driven rendering is enabled, and we haven't opted-out from lightmap
+// texture arrays. This minimizes batch breakages, but texture arrays aren't
+// supported in a performant way on all GPUs.
+#define SHADOWMASK_NAME unity_ShadowMasks
+#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMasks
+#define SHADOWMASK_SAMPLE_EXTRA_ARGS , unity_LightmapIndex.x
+#else
+// ^ Lightmaps are not bound as texture arrays, but as individual textures. The
+// batch is broken every time lightmaps are changed, but this is well-supported
+// on all GPUs.
+#define SHADOWMASK_NAME unity_ShadowMask
+#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMask
+#define SHADOWMASK_SAMPLE_EXTRA_ARGS
+#endif
+
+#if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+    #define SAMPLE_SHADOWMASK(uv) SAMPLE_TEXTURE2D_LIGHTMAP(SHADOWMASK_NAME, SHADOWMASK_SAMPLER_NAME, uv SHADOWMASK_SAMPLE_EXTRA_ARGS);
+#elif !defined (LIGHTMAP_ON)
+    #define SAMPLE_SHADOWMASK(uv) unity_ProbesOcclusion;
+#else
+    #define SAMPLE_SHADOWMASK(uv) half4(1, 1, 1, 1);
+#endif
+
+#define REQUIRES_WORLD_SPACE_POS_INTERPOLATOR
+
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);
+SAMPLER_CMP(sampler_LinearClampCompare);
 
 // GLES3 causes a performance regression in some devices when using CBUFFER.
 #ifndef SHADER_API_GLES3
@@ -27,7 +53,6 @@ CBUFFER_START(LightShadows)
 // shadow coord to half3(0, 0, NEAR_PLANE). We use this trick to avoid
 // branching since ComputeCascadeIndex can return cascade index = MAX_SHADOW_CASCADES
 float4x4    _MainLightWorldToShadow[MAX_SHADOW_CASCADES + 1];
-float4      _MainLightShadowParams;   // (x: shadowStrength, y: >= 1.0 if soft shadows, 0.0 otherwise, z: main light fade scale, w: main light fade bias)
 float4      _CascadeShadowSplitSpheres0;
 float4      _CascadeShadowSplitSpheres1;
 float4      _CascadeShadowSplitSpheres2;
@@ -36,6 +61,7 @@ float4      _CascadeShadowSplitSphereRadii;
 
 float4      _MainLightShadowOffset0; // xy: offset0, zw: offset1
 float4      _MainLightShadowOffset1; // xy: offset2, zw: offset3
+float4      _MainLightShadowParams;   // (x: shadowStrength, y: >= 1.0 if soft shadows, 0.0 otherwise, z: main light fade scale, w: main light fade bias)
 float4      _MainLightShadowmapSize;  // (xy: 1/width and 1/height, zw: width and height)
 
 #ifndef SHADER_API_GLES3
@@ -43,6 +69,7 @@ CBUFFER_END
 #endif
 
 float4 _ShadowBias; // x: depth bias, y: normal bias
+
 #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 
 // Should match: UnityEngine.Rendering.Universal + 1
@@ -165,22 +192,22 @@ real SampleShadowmap(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float
 
     // Quality levels are only for platforms requiring strict static branches
     #if defined(_SHADOWS_SOFT_LOW)
-    attenuation = SampleShadowmapFilteredLowQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
+        attenuation = SampleShadowmapFilteredLowQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
     #elif defined(_SHADOWS_SOFT_MEDIUM)
-    attenuation = SampleShadowmapFilteredMediumQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
+        attenuation = SampleShadowmapFilteredMediumQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
     #elif defined(_SHADOWS_SOFT_HIGH)
-    attenuation = SampleShadowmapFilteredHighQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
+        attenuation = SampleShadowmapFilteredHighQuality(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
     #elif defined(_SHADOWS_SOFT)
-    if (shadowParams.y > SOFT_SHADOW_QUALITY_OFF)
-    {
-        attenuation = SampleShadowmapFiltered(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
-    }
-    else
-    {
-        attenuation = real(SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
-    }
+        if (shadowParams.y > SOFT_SHADOW_QUALITY_OFF)
+        {
+            attenuation = SampleShadowmapFiltered(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
+        }
+        else
+        {
+            attenuation = real(SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
+        }
     #else
-    attenuation = real(SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
+        attenuation = real(SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
     #endif
 
     attenuation = LerpWhiteTo(attenuation, shadowStrength);
@@ -188,6 +215,54 @@ real SampleShadowmap(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float
     // Shadow coords that fall out of the light frustum volume must always return attenuation 1.0
     // TODO: We could use branch here to save some perf on some platforms.
     return BEYOND_SHADOW_FAR(shadowCoord) ? 1.0 : attenuation;
+}
+
+half ComputeCascadeIndex(float3 positionWS)
+{
+    float3 fromCenter0 = positionWS - _CascadeShadowSplitSpheres0.xyz;
+    float3 fromCenter1 = positionWS - _CascadeShadowSplitSpheres1.xyz;
+    float3 fromCenter2 = positionWS - _CascadeShadowSplitSpheres2.xyz;
+    float3 fromCenter3 = positionWS - _CascadeShadowSplitSpheres3.xyz;
+    float4 distances2 = float4(dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2), dot(fromCenter3, fromCenter3));
+
+    half4 weights = half4(distances2 < _CascadeShadowSplitSphereRadii);
+    weights.yzw = saturate(weights.yzw - weights.xyz);
+
+    return half(4.0) - dot(weights, half4(4, 3, 2, 1));
+}
+
+float4 TransformWorldToShadowCoord(float3 positionWS)
+{
+#ifdef _MAIN_LIGHT_SHADOWS_CASCADE
+    half cascadeIndex = ComputeCascadeIndex(positionWS);
+#else
+    half cascadeIndex = half(0.0);
+#endif
+
+    float4 shadowCoord = mul(_MainLightWorldToShadow[cascadeIndex], float4(positionWS, 1.0));
+
+    return float4(shadowCoord.xyz, 0);
+}
+
+half MainLightRealtimeShadow(float4 shadowCoord)
+{
+    ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
+    half4 shadowParams = GetMainLightShadowParams();
+    return SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), shadowCoord, shadowSamplingData, shadowParams, false);
+}
+
+half GetMainLightShadowFade(float3 positionWS)
+{
+    float3 camToPixel = positionWS - _WorldSpaceCameraPos;
+    float distanceCamToPixel2 = dot(camToPixel, camToPixel);
+
+    float fade = saturate(distanceCamToPixel2 * float(_MainLightShadowParams.z) + float(_MainLightShadowParams.w));
+    return half(fade);
+}
+
+float4 GetShadowCoord(VertexPositionInputs vertexInput)
+{
+    return TransformWorldToShadowCoord(vertexInput.positionWS);
 }
 
 float3 ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection)

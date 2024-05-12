@@ -27,16 +27,16 @@ namespace LiteRP.Editor
             }
             else
             {
-                SurfaceType surfaceType = (SurfaceType)material.GetFloat("_Surface");
-                BlendMode blendMode = (BlendMode)material.GetFloat("_Blend");
+                SurfaceType surfaceType = (SurfaceType)material.GetFloat(LiteRPShaderProperty.SurfaceType);
+                BlendMode blendMode = (BlendMode)material.GetFloat(LiteRPShaderProperty.BlendMode);
             
                 if (surfaceType == SurfaceType.Opaque)
                 {
-                    material.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    material.DisableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
                 }
                 else
                 {
-                    material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    material.EnableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
                 }
             }
         }

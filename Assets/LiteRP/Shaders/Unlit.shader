@@ -22,6 +22,7 @@ Shader "LiteRP/Unlit"
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
         [HideInInspector] _AlphaToMask("__alphaToMask", Float) = 0.0
         
+        [ToggleUI] _ReceiveShadows("Receive Shadows", Float) = 1.0
         // Editmode props
         _QueueOffset("Queue offset", Float) = 0.0
     }
@@ -57,6 +58,12 @@ Shader "LiteRP/Unlit"
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ALPHAMODULATE_ON
             #pragma shader_feature_local_fragment _EMISSION
+            
+            // LiteRP keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             //Unity defined keywords
             #pragma multi_compile_fog               // make fog work
@@ -65,6 +72,7 @@ Shader "LiteRP/Unlit"
             #pragma multi_compile_instancing
             #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
             // Includes
+            #include "../Runtime/ShaderLibrary/UnlitInput.hlsl"
             #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
             ENDHLSL
         }
@@ -108,6 +116,7 @@ Shader "LiteRP/Unlit"
             #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
             // -------------------------------------
             // Includes
+            #include "../Runtime/ShaderLibrary/UnlitInput.hlsl"
             #include "../Runtime/ShaderLibrary/ShadowCasterPass.hlsl"
             
             ENDHLSL
