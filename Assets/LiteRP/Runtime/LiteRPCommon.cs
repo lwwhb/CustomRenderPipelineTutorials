@@ -2,6 +2,33 @@ using UnityEngine;
 
 namespace LiteRP
 {
+    /// <summary>
+    /// Options for setting MSAA Quality.
+    /// This defines how many samples URP computes per pixel for evaluating the effect.
+    /// </summary>
+    public enum MsaaQuality
+    {
+        /// <summary>
+        /// Disables MSAA.
+        /// </summary>
+        Disabled = 1,
+
+        /// <summary>
+        /// Use this for 2 samples per pixel.
+        /// </summary>
+        _2x = 2,
+
+        /// <summary>
+        /// Use this for 4 samples per pixel.
+        /// </summary>
+        _4x = 4,
+
+        /// <summary>
+        /// Use this for 8 samples per pixel.
+        /// </summary>
+        _8x = 8
+    }
+    
     public enum ShadowQuality
     {
         /// <summary>
@@ -77,5 +104,29 @@ namespace LiteRP
         /// Use this for 8192x8192 shadow resolution.
         /// </summary>
         _8192 = 8192,
+    }
+    
+    /// <summary>
+    /// Defines the update frequency for the Volume Framework.
+    /// </summary>
+    public enum VolumeFrameworkUpdateMode
+    {
+        /// <summary>
+        /// Use this to have the Volume Framework update every frame.
+        /// </summary>
+        [InspectorName("Every Frame")]
+        EveryFrame = 0,
+
+        /// <summary>
+        /// Use this to disable Volume Framework updates or to update it manually via scripting.
+        /// </summary>
+        [InspectorName("Via Scripting")]
+        ViaScripting = 1,
+
+        /// <summary>
+        /// Use this to choose the setting set on the pipeline asset.
+        /// </summary>
+        [InspectorName("Use Pipeline Settings")]
+        UsePipelineSettings = 2,
     }
 }

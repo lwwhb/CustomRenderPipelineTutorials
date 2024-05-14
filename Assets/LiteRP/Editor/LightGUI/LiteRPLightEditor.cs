@@ -26,24 +26,11 @@ namespace LiteRP.Editor
             OnDisable();
             OnEnable();
         }
-        internal static bool IsPresetEditor(UnityEditor.Editor editor)
-        {
-            return (int)((editor.target as Component).gameObject.hideFlags) == 93;
-        }
 
         public override void OnInspectorGUI()
         {
             serializedLightProperties.Update();
-
-            if (IsPresetEditor(this))
-            {
-                //LiteRPLightGUIHelper.PresetInspector.Draw(serializedLightProperties, this);
-            }
-            else
-            {
-                LiteRPLightGUIHelper.Inspector.Draw(serializedLightProperties, this);
-            }
-
+            LiteRPLightGUIHelper.Inspector.Draw(serializedLightProperties, this);
             serializedLightProperties.Apply();
         }
 

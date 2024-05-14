@@ -14,6 +14,11 @@ namespace LiteRP
         private LiteRPRenderGraphRecorder m_LiteRPRenderGraphRecorder = null; //渲染图记录器
         private ContextContainer m_ContextContainer = null; //上下文容器
 
+        public static LiteRPAsset asset
+        {
+            get => GraphicsSettings.currentRenderPipeline as LiteRPAsset;
+        }
+
         public LiteRenderPipeline(LiteRPAsset asset)
         {
             m_Asset = asset;

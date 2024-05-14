@@ -28,6 +28,10 @@ namespace LiteRP.Editor
         
         public static readonly string SupportsSoftShadows = "m_SoftShadowsSupported";
         public static readonly string SoftShadowQuality = "m_SoftShadowQuality";
+        
+        // Other Settings
+        public static readonly string VolumeFrameworkUpdateMode = "m_VolumeFrameworkUpdateMode";
+        public static readonly string VolumeProfile = "m_VolumeProfile";
     }
     internal class SerializedLiteRPAssetProperties
     {
@@ -60,6 +64,9 @@ namespace LiteRP.Editor
         
         // Other Settings
         public EditorPrefBoolFlags<EditorUtils.Unit> state;
+        
+        public SerializedProperty volumeFrameworkUpdateModeProp { get; }
+        public SerializedProperty volumeProfileProp { get; }
         
         public SerializedLiteRPAssetProperties(SerializedObject serializedObject)
         {
@@ -94,6 +101,9 @@ namespace LiteRP.Editor
             // Other Settings
             string Key = "ShadowSettings_Unit:UI_State";
             state = new EditorPrefBoolFlags<EditorUtils.Unit>(Key);
+            
+            volumeFrameworkUpdateModeProp = serializedObject.FindProperty(LiteRPAssetProperty.VolumeFrameworkUpdateMode);
+            volumeProfileProp = serializedObject.FindProperty(LiteRPAssetProperty.VolumeProfile);
         }
         
         public void Update()

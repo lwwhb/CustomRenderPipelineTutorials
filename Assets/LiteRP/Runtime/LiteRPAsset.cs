@@ -61,6 +61,20 @@ namespace LiteRP
         }
         
         // QulitySettings
+        [SerializeField] bool m_SupportsHDR = true;
+        public bool supportsHDR
+        {
+            get => m_SupportsHDR;
+            set => m_SupportsHDR = value;
+        }
+        
+        [SerializeField] MsaaQuality m_MSAA = MsaaQuality.Disabled;
+        public int msaaSampleCount
+        {
+            get => (int)m_MSAA;
+            set => m_MSAA = (MsaaQuality)value;
+        }
+        
         [SerializeField] int m_AntiAliasing = 1;
         public int antiAliasing
         {
@@ -188,6 +202,25 @@ namespace LiteRP
         {
             get => m_SoftShadowQuality;
             set => m_SoftShadowQuality = value;
+        }
+        
+        // OtherSettings
+        
+        /// <summary>
+        /// Returns the selected update mode for volumes.
+        /// </summary>
+        [SerializeField] VolumeFrameworkUpdateMode m_VolumeFrameworkUpdateMode = VolumeFrameworkUpdateMode.EveryFrame;
+        public VolumeFrameworkUpdateMode volumeFrameworkUpdateMode => m_VolumeFrameworkUpdateMode;
+
+        /// <summary>
+        /// A volume profile that can be used to override global default volume profile values. This provides a way e.g.
+        /// to have different volume default values per quality level without having to place global volumes in scenes.
+        /// </summary>
+        [SerializeField] VolumeProfile m_VolumeProfile;
+        public VolumeProfile volumeProfile
+        {
+            get => m_VolumeProfile;
+            set => m_VolumeProfile = value;
         }
         
         protected override RenderPipeline CreatePipeline()
