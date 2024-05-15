@@ -16,6 +16,8 @@ MonoBehaviour:
   m_GPUResidentDrawerMode: 0
   m_SmallMeshScreenPercentage: 0
   m_GPUResidentDrawerEnableOcclusionCullingInCameras: 0
+  m_SupportsHDR: 1
+  m_MSAA: 1
   m_AntiAliasing: 1
   m_ConservativeEnclosingSphere: 0
   m_NumIterationsEnclosingSphere: 64
@@ -33,3 +35,5 @@ MonoBehaviour:
   m_AnyShadowsSupported: 1
   m_SoftShadowsSupported: 1
   m_SoftShadowQuality: 2
+  m_VolumeFrameworkUpdateMode: 0
+  m_VolumeProfile: {fileID: 0}

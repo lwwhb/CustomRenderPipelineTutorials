@@ -145,7 +145,7 @@ namespace LiteRP
             if (!shadowData.supportMainLightShadow)
                 return;
             
-            shadowData.mainLightShadowResolution = ShadowUtils.GetMaxTileResolutionInAtlas(shadowData.mainLightShadowmapWidth, shadowData.mainLightShadowmapHeight, shadowData.mainLightShadowCascadesCount);
+            shadowData.mainLightTileShadowResolution = ShadowUtils.GetMaxTileResolutionInAtlas(shadowData.mainLightShadowmapWidth, shadowData.mainLightShadowmapHeight, shadowData.mainLightShadowCascadesCount);
             shadowData.mainLightRenderTargetWidth = shadowData.mainLightShadowmapWidth;
             shadowData.mainLightRenderTargetHeight = (shadowData.mainLightShadowCascadesCount == 2) ? shadowData.mainLightShadowmapHeight >> 1 : shadowData.mainLightShadowmapHeight;
 
@@ -194,7 +194,7 @@ namespace LiteRP
                 int splitCount = shadowData.mainLightShadowCascadesCount;
                 int renderTargetWidth = shadowData.mainLightRenderTargetWidth;
                 int renderTargetHeight = shadowData.mainLightRenderTargetHeight;
-                int shadowResolution = shadowData.mainLightShadowResolution;
+                int shadowResolution = shadowData.mainLightTileShadowResolution;
 
                 slices = new NativeArray<ShadowSliceData>(splitCount, Allocator.Temp);
                 slicesValidMask = 0;

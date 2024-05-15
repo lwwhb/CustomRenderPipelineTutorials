@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LiteRP.AdditionalData;
 using LiteRP.FrameData;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -137,6 +138,18 @@ namespace LiteRP
             CameraData cameraData = m_ContextContainer.GetOrCreate<CameraData>();
             cameraData.camera = camera;
             cameraData.cullingResults = cullingResults;
+            bool anyShadowsEnabled = m_Asset.mainLightShadowEnabled;
+            cameraData.maxShadowDistance = Mathf.Min(m_Asset.mainLightShadowDistance, camera.farClipPlane);
+            cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ? cameraData.maxShadowDistance : 0.0f;
+            // 初始化摄像机附加管线数据
+            AdditionalCameraData additionalCameraData = null;
+            if (camera.cameraType == CameraType.Game)
+                camera.gameObject.TryGetComponent(out additionalCameraData);
+            if (additionalCameraData != null)
+            {
+                cameraData.postProcessEnabled = additionalCameraData.renderPostProcessing;
+                cameraData.maxShadowDistance = additionalCameraData.renderShadows ? cameraData.maxShadowDistance : 0.0f;
+            }
             
             //初始化灯光帧数据
             LightData lightData = m_ContextContainer.GetOrCreate<LightData>();
@@ -149,8 +162,8 @@ namespace LiteRP
             //初始化阴影帧数据
             ShadowData shadowData = m_ContextContainer.GetOrCreate<ShadowData>();
             // maxShadowDistance is set to 0.0f when the Render Shadows toggle is disabled on the camera
-            bool cameraRenderShadows = true;//cameraData.maxShadowDistance > 0.0f;      //注意条件
-            shadowData.mainLightShadowEnabled = m_Asset.mainLightShadowEnabled;
+            bool cameraRenderShadows = cameraData.maxShadowDistance > 0.0f;      
+            shadowData.mainLightShadowEnabled = anyShadowsEnabled;
             shadowData.supportMainLightShadow = SystemInfo.supportsShadows && shadowData.mainLightShadowEnabled && cameraRenderShadows;
             shadowData.mainLightShadowDistance = cullingParameters.shadowDistance;
             
@@ -171,6 +184,13 @@ namespace LiteRP
             shadowData.supportMainLightShadow &= mainLightIndex != -1
                                                  && light != null
                                                  && light.shadows != LightShadows.None;
+            // 初始化灯光附加管线数据
+            AdditionalLightData data = null;
+            if (light != null)
+            {
+                light.gameObject.TryGetComponent(out data);
+            }
+            
             if (!shadowData.supportMainLightShadow)
             {
                 shadowData.mainLightShadowBias = Vector4.zero;
@@ -178,8 +198,11 @@ namespace LiteRP
             }
             else
             {
-                shadowData.mainLightShadowBias = new Vector4(m_Asset.mainLightShadowDepthBias, m_Asset.mainLightShadowNormalBias, 0.0f, 0.0f);  //临时写法
-                shadowData.mainLightShadowmapResolution = (int)light.shadowResolution;
+                if (data && !data.usePipelineSettings)
+                    shadowData.mainLightShadowBias = new Vector4(light.shadowBias, light.shadowNormalBias, 0.0f, 0.0f);  
+                else
+                    shadowData.mainLightShadowBias = new Vector4(m_Asset.mainLightShadowDepthBias, m_Asset.mainLightShadowNormalBias, 0.0f, 0.0f);
+                shadowData.mainLightShadowmapResolution = m_Asset.mainLightShadowmapResolution;
             }
             shadowData.supportsSoftShadows = m_Asset.supportsSoftShadows && shadowData.supportMainLightShadow;
             

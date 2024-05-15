@@ -6,12 +6,19 @@ namespace LiteRP.FrameData
     public class CameraData : ContextItem
     {
         public Camera camera;
+        // 剔除结果
         public CullingResults cullingResults;
+        // 最大阴影距离
+        public float maxShadowDistance;
+        //后处理是否开启
+        public bool postProcessEnabled;
 
         public override void Reset()
         {
             camera = null;
             cullingResults = default;
+            maxShadowDistance = 0.0f;
+            postProcessEnabled = false;
         }
 
         public RTClearFlags GetClearFlags()

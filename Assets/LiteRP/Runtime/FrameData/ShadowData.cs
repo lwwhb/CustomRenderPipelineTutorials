@@ -43,7 +43,7 @@ namespace LiteRP.FrameData
         // 主光源 ShadowMap 分辨率
         public int mainLightShadowmapResolution;
         
-        internal int mainLightShadowResolution;
+        internal int mainLightTileShadowResolution;
         internal int mainLightRenderTargetWidth;
         internal int mainLightRenderTargetHeight;
 
@@ -64,7 +64,7 @@ namespace LiteRP.FrameData
             mainLightShadowBias = Vector4.zero;
             mainLightShadowmapResolution = 0;
             
-            mainLightShadowResolution = 0;
+            mainLightTileShadowResolution = 0;
             mainLightRenderTargetWidth = 0;
             mainLightRenderTargetHeight = 0;
 
