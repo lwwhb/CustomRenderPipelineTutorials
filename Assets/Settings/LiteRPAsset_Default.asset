@@ -19,7 +19,7 @@ MonoBehaviour:
   m_SupportsHDR: 1
   m_MSAA: 1
   m_AntiAliasing: 1
-  m_ConservativeEnclosingSphere: 0
+  m_ConservativeEnclosingSphere: 1
   m_NumIterationsEnclosingSphere: 64
   m_AdditionalLightsPerObjectLimit: 4
   m_MainLightShadowEnabled: 1
