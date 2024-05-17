@@ -12,6 +12,9 @@
 #if !defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
         #define MAIN_LIGHT_CALCULATE_SHADOWS
+        #if defined(_MAIN_LIGHT_SHADOWS)
+            #define REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR
+        #endif
     #endif
 #endif
 
@@ -246,9 +249,13 @@ float4 TransformWorldToShadowCoord(float3 positionWS)
 
 half MainLightRealtimeShadow(float4 shadowCoord)
 {
-    ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
-    half4 shadowParams = GetMainLightShadowParams();
-    return SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), shadowCoord, shadowSamplingData, shadowParams, false);
+    #if !defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+        return half(1.0);
+    #else
+        ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
+        half4 shadowParams = GetMainLightShadowParams();
+        return SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), shadowCoord, shadowSamplingData, shadowParams, false);
+    #endif
 }
 
 half GetMainLightShadowFade(float3 positionWS)
@@ -258,6 +265,21 @@ half GetMainLightShadowFade(float3 positionWS)
 
     float fade = saturate(distanceCamToPixel2 * float(_MainLightShadowParams.z) + float(_MainLightShadowParams.w));
     return half(fade);
+}
+
+half MainLightShadow(float4 shadowCoord, float3 positionWS)
+{
+    half realtimeShadow = MainLightRealtimeShadow(shadowCoord);
+    
+    half bakedShadow = half(1.0);
+
+    #ifdef MAIN_LIGHT_CALCULATE_SHADOWS
+        half shadowFade = GetMainLightShadowFade(positionWS);
+    #else
+        half shadowFade = half(1.0);
+    #endif
+
+    return lerp(realtimeShadow, bakedShadow, shadowFade);
 }
 
 float4 GetShadowCoord(VertexPositionInputs vertexInput)

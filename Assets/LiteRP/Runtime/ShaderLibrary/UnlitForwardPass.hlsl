@@ -19,10 +19,12 @@ struct Varyings
     float4 positionCS : SV_POSITION;
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
-    #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-        float4 shadowCoord : TEXCOORD2;
-        float3 positionWS : TEXCOORD3;
+    float3 positionWS : TEXCOORD2;
+    
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+        float4 shadowCoord             : TEXCOORD3;
     #endif
+   
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -43,11 +45,12 @@ Varyings UnlitPassVertex(Attributes input)
         output.fogCoord = ComputeFogFactor(vertexInput.positionCS.z);
     #endif
 
-    #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-        output.shadowCoord = GetShadowCoord(vertexInput);
-        output.positionWS = vertexInput.positionWS;
-    #endif
+    output.positionWS = vertexInput.positionWS;
 
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+        output.shadowCoord = GetShadowCoord(vertexInput);
+    #endif
+    
     return output;
 }
 
@@ -57,10 +60,18 @@ void UnlitPassFragment(Varyings input, out half4 outColor : SV_Target0)
     half2 uv = input.uv;
     half4 texColor = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
 
-    half shadow = 1.0f;
-    #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+    half shadow = 1.0;
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+        float4 shadowCoord = input.shadowCoord;
+        half shadowFade = half(1.0);
+        shadow = MainLightShadow(shadowCoord, input.positionWS);
+    #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+        float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
         half shadowFade = GetMainLightShadowFade(input.positionWS);
-        shadow = lerp(MainLightRealtimeShadow(input.shadowCoord), 1.0f, shadowFade);
+        shadow = MainLightShadow(shadowCoord, input.positionWS);
+    #else
+        float4 shadowCoord = float4(0, 0, 0, 0);
+        half shadowFade = half(1.0);
     #endif
     
     half3 color = texColor.rgb * _BaseColor.rgb * shadow;
