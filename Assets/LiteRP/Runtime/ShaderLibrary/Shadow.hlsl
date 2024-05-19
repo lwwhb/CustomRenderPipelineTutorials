@@ -18,30 +18,6 @@
     #endif
 #endif
 
-#if defined(UNITY_DOTS_INSTANCING_ENABLED) && !defined(USE_LEGACY_LIGHTMAPS)
-// ^ GPU-driven rendering is enabled, and we haven't opted-out from lightmap
-// texture arrays. This minimizes batch breakages, but texture arrays aren't
-// supported in a performant way on all GPUs.
-#define SHADOWMASK_NAME unity_ShadowMasks
-#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMasks
-#define SHADOWMASK_SAMPLE_EXTRA_ARGS , unity_LightmapIndex.x
-#else
-// ^ Lightmaps are not bound as texture arrays, but as individual textures. The
-// batch is broken every time lightmaps are changed, but this is well-supported
-// on all GPUs.
-#define SHADOWMASK_NAME unity_ShadowMask
-#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMask
-#define SHADOWMASK_SAMPLE_EXTRA_ARGS
-#endif
-
-#if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
-    #define SAMPLE_SHADOWMASK(uv) SAMPLE_TEXTURE2D_LIGHTMAP(SHADOWMASK_NAME, SHADOWMASK_SAMPLER_NAME, uv SHADOWMASK_SAMPLE_EXTRA_ARGS);
-#elif !defined (LIGHTMAP_ON)
-    #define SAMPLE_SHADOWMASK(uv) unity_ProbesOcclusion;
-#else
-    #define SAMPLE_SHADOWMASK(uv) half4(1, 1, 1, 1);
-#endif
-
 #define REQUIRES_WORLD_SPACE_POS_INTERPOLATOR
 
 TEXTURE2D_SHADOW(_MainLightShadowmapTexture);

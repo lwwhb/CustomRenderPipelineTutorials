@@ -19,7 +19,9 @@ struct Varyings
     float4 positionCS : SV_POSITION;
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
-    float3 positionWS : TEXCOORD2;
+    #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
+        float3 positionWS               : TEXCOORD2;
+    #endif
     
     #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
         float4 shadowCoord             : TEXCOORD3;
@@ -45,7 +47,9 @@ Varyings UnlitPassVertex(Attributes input)
         output.fogCoord = ComputeFogFactor(vertexInput.positionCS.z);
     #endif
 
-    output.positionWS = vertexInput.positionWS;
+    #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
+        output.positionWS = vertexInput.positionWS;
+    #endif
 
     #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
         output.shadowCoord = GetShadowCoord(vertexInput);
