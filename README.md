@@ -15,3 +15,6 @@ Unity6的自定义渲染管线教程
 * 3月29日 Lesson12第十二节 自定义Material Inspector
 * 4月17日 Lesson13第十三节 自定义Unlit Shader GUI
 * 4月23日 Lesson14第十四节 自定义RenderPipeline Assets Editor实现SrpBatcher功能配置
+* 4月29日 Lesson15第十五节 主光源阴影——功能设计
+* 5月5日 Lesson16第十六节 主光源阴影——功能实现(1)
+* 5月18日 Lesson16第十七节 主光源阴影——功能实现(2)
