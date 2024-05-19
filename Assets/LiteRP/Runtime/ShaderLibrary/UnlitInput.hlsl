@@ -1,7 +1,7 @@
 #ifndef LITERP_UNLIT_INPUT_INCLUDED
 #define LITERP_UNLIT_INPUT_INCLUDED
 
-float _AlphaToMaskAvailable;
+#include "SrpCoreShaderLibraryIncludes.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseMap_ST;

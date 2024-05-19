@@ -144,9 +144,9 @@ namespace LiteRP.Editor
             m_ReceiveShadowsProperty = FindProperty(LiteRPShaderProperty.ReceiveShadows, properties, false);
 
             // The following are not mandatory for shadergraphs (it's up to the user to add them to their graph)
-            m_AlphaCutoffProperty = FindProperty("_Cutoff", properties, false);
-            m_BaseMapProperty = FindProperty("_BaseMap", properties, false);
-            m_BaseColorProperty = FindProperty("_BaseColor", properties, false);
+            m_AlphaCutoffProperty = FindProperty(LiteRPShaderProperty.Cutoff, properties, false);
+            m_BaseMapProperty = FindProperty(LiteRPShaderProperty.BaseMap, properties, false);
+            m_BaseColorProperty = FindProperty(LiteRPShaderProperty.BaseColor, properties, false);
             m_EmissionMapProperty = FindProperty(LiteRPShaderProperty.EmissionMap, properties, false);
             m_EmissionColorProperty = FindProperty(LiteRPShaderProperty.EmissionColor, properties, false);
             m_QueueOffsetProperty = FindProperty(LiteRPShaderProperty.QueueOffset, properties, false);

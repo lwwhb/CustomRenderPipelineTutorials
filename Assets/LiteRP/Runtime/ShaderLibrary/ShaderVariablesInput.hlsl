@@ -2,6 +2,10 @@
 #ifndef LITERP_SHADER_VARIABLES_INPUT_INCLUDED
 #define LITERP_SHADER_VARIABLES_INPUT_INCLUDED
 
+float3 _WorldSpaceCameraPos;
+
+float _AlphaToMaskAvailable;
+
 // x = 1 or -1 (-1 if projection is flipped)
 // y = near plane
 // z = far plane

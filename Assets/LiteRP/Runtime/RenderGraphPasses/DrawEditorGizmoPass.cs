@@ -6,7 +6,7 @@ using UnityEngine.Rendering.RenderGraphModule;
 
 namespace LiteRP
 {
-    public partial class LiteRenderGraphRecorder
+    public partial class LiteRPRenderGraphRecorder
     { 
         private static readonly ProfilingSampler s_DrawEditorGizmoProfilingSampler = new ProfilingSampler("DrawEditorGizmoPass");
         internal class DrawEditorGizmoPassData
