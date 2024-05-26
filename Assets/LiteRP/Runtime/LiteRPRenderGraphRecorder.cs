@@ -28,6 +28,7 @@ namespace LiteRP
             LightData lightData = frameData.Get<LightData>();
             ShadowData shadowData = frameData.Get<ShadowData>();
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
+            AddInitRenderGraphFramePass(renderGraph);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
 
             if (NeedMainLightShadowMapPass(cameraData, lightData, shadowData))
