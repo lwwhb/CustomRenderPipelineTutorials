@@ -1,5 +1,3 @@
-using LiteRP.FrameData;
-using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
 

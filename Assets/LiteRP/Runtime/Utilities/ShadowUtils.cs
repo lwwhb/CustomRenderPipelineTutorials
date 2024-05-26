@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LiteRP.AdditionalData;
 using LiteRP.FrameData;
 using Unity.Collections;
 using UnityEngine;
@@ -322,7 +323,9 @@ namespace LiteRP
             
             if (supportsSoftShadows && shadowLight.light.shadows == LightShadows.Soft)
             {
-                var softShadowQuality = LiteRPUtils.asset?.softShadowQuality;
+                SoftShadowQuality softShadowQuality = SoftShadowQuality.Medium;
+                if (shadowLight.light.TryGetComponent(out AdditionalLightData additionalLightData))
+                    softShadowQuality = additionalLightData.softShadowQuality;
 
                 // TODO: depth and normal bias assume sample is no more than 1 texel away from shadowmap
                 // This is not true with PCF. Ideally we need to do either

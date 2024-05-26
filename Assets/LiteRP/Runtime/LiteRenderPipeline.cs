@@ -143,8 +143,7 @@ namespace LiteRP
             cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ? cameraData.maxShadowDistance : 0.0f;
             // 初始化摄像机附加管线数据
             AdditionalCameraData additionalCameraData = null;
-            if (camera.cameraType == CameraType.Game)
-                camera.gameObject.TryGetComponent(out additionalCameraData);
+            camera.gameObject.TryGetComponent(out additionalCameraData);
             if (additionalCameraData != null)
             {
                 cameraData.postProcessEnabled = additionalCameraData.renderPostProcessing;
@@ -184,12 +183,6 @@ namespace LiteRP
             shadowData.supportMainLightShadow &= mainLightIndex != -1
                                                  && light != null
                                                  && light.shadows != LightShadows.None;
-            // 初始化灯光附加管线数据
-            AdditionalLightData data = null;
-            if (light != null)
-            {
-                light.gameObject.TryGetComponent(out data);
-            }
             
             if (!shadowData.supportMainLightShadow)
             {
@@ -198,6 +191,10 @@ namespace LiteRP
             }
             else
             {
+                // 初始化灯光附加管线数据
+                AdditionalLightData data = null;
+                if (light != null)
+                    light.gameObject.TryGetComponent(out data);
                 if (data && !data.usePipelineSettings)
                     shadowData.mainLightShadowBias = new Vector4(light.shadowBias, light.shadowNormalBias, 0.0f, 0.0f);  
                 else

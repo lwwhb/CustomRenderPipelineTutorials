@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -17,8 +16,8 @@ namespace LiteRP.Editor
         
         public void OnEnable()
         {
+            settings.OnEnable();
             serializedCameraProperties = new SerializedLiteRPCameraProperties(serializedObject, settings);
-            serializedCameraProperties.Refresh();
             Undo.undoRedoPerformed += ReconstructReferenceToAdditionalDataSO;
         }
         public void OnDisable()

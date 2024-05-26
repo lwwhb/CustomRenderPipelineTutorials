@@ -7,6 +7,10 @@ using UnityEngine.Serialization;
 
 namespace LiteRP.AdditionalData
 {
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(Camera))]
+    [ImageEffectAllowedInSceneView]
+    [ExecuteAlways]
     public class AdditionalCameraData : MonoBehaviour, ISerializationCallbackReceiver, IAdditionalData
     {
         /// <summary>
@@ -41,8 +45,7 @@ namespace LiteRP.AdditionalData
         /// <summary>
         /// Controls if this camera should render shadows.
         /// </summary>
-        [FormerlySerializedAs("renderShadows"), SerializeField]
-        bool m_RenderShadows = true;
+        [SerializeField] bool m_RenderShadows = true;
         public bool renderShadows
         {
             get => m_RenderShadows;
