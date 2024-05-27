@@ -17,4 +17,5 @@ Unity6的自定义渲染管线教程
 * 4月23日 Lesson14第十四节 自定义RenderPipeline Assets Editor实现SrpBatcher功能配置
 * 4月29日 Lesson15第十五节 主光源阴影——功能设计
 * 5月5日 Lesson16第十六节 主光源阴影——功能实现(1)
-* 5月18日 Lesson16第十七节 主光源阴影——功能实现(2)
+* 5月18日 Lesson17第十七节 主光源阴影——功能实现(2)
+* 5月25日 Lesson18第十八节 为引擎内对象附加自定义管线数据
