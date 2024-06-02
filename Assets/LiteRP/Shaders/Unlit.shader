@@ -32,6 +32,8 @@ Shader "LiteRP/Unlit"
         Tags { 
             "RenderType"="Opaque" 
             "RenderPipeline" = "LiteRP"
+            "LiteRPMaterialType" = "Unlit"
+            "IgnoreProjector" = "True"
         }
         LOD 100
         
@@ -103,12 +105,6 @@ Shader "LiteRP/Unlit"
             // -------------------------------------
             // Material Keywords
             #pragma shader_feature_local _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-
-            // LiteRP keywords
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             //--------------------------------------
             // GPU Instancing
