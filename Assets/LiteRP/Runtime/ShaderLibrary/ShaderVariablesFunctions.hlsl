@@ -1,6 +1,7 @@
 #ifndef LITERP_SHADER_VARIABLES_FUNCTIONS_INCLUDED
 #define LITERP_SHADER_VARIABLES_FUNCTIONS_INCLUDED
 
+#include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "ShaderVariablesInput.hlsl"
 #include "ShaderInputData.hlsl"
 
@@ -44,6 +45,100 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS)
     tbn.bitangentWS = real3(0.0, 1.0, 0.0);
     tbn.normalWS = TransformObjectToWorldNormal(normalOS);
     return tbn;
+}
+
+VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
+{
+    VertexNormalInputs tbn;
+
+    // mikkts space compliant. only normalize when extracting normal at frag.
+    real sign = real(tangentOS.w) * GetOddNegativeScale();
+    tbn.normalWS = TransformObjectToWorldNormal(normalOS);
+    tbn.tangentWS = real3(TransformObjectToWorldDir(tangentOS.xyz));
+    tbn.bitangentWS = real3(cross(tbn.normalWS, float3(tbn.tangentWS))) * sign;
+    return tbn;
+}
+
+float4 GetScaledScreenParams()
+{
+    return _ScaledScreenParams;
+}
+
+bool IsPerspectiveProjection()
+{
+    return (unity_OrthoParams.w == 0);
+}
+
+float3 GetCameraPositionWS()
+{
+    // Currently we do not support Camera Relative Rendering so
+    // we simply return the _WorldSpaceCameraPos until then
+    return _WorldSpaceCameraPos;
+
+    // We will replace the code above with this one once
+    // we start supporting Camera Relative Rendering
+    //#if (SHADEROPTIONS_CAMERA_RELATIVE_RENDERING != 0)
+    //    return float3(0, 0, 0);
+    //#else
+    //    return _WorldSpaceCameraPos;
+    //#endif
+}
+
+float3 GetCurrentViewPosition()
+{
+    // Currently we do not support Camera Relative Rendering so
+    // we simply return the _WorldSpaceCameraPos until then
+    return GetCameraPositionWS();
+
+    // We will replace the code above with this one once
+    // we start supporting Camera Relative Rendering
+    //#if defined(SHADERPASS) && (SHADERPASS != SHADERPASS_SHADOWS)
+    //    return GetCameraPositionWS();
+    //#else
+    //    // This is a generic solution.
+    //    // However, for the primary camera, using '_WorldSpaceCameraPos' is better for cache locality,
+    //    // and in case we enable camera-relative rendering, we can statically set the position is 0.
+    //    return UNITY_MATRIX_I_V._14_24_34;
+    //#endif
+}
+float3 GetViewForwardDir()
+{
+    float4x4 viewMat = GetWorldToViewMatrix();
+    return -viewMat[2].xyz;
+}
+
+half3 GetWorldSpaceNormalizeViewDir(float3 positionWS)
+{
+    if (IsPerspectiveProjection())
+    {
+        // Perspective
+        float3 V = GetCurrentViewPosition() - positionWS;
+        return half3(normalize(V));
+    }
+    else
+    {
+        // Orthographic
+        return half3(-GetViewForwardDir());
+    }
+}
+
+half3 NormalizeNormalPerPixel(half3 normalWS)
+{
+    // With XYZ normal map encoding we sporadically sample normals with near-zero-length causing Inf/NaN
+    #if defined(UNITY_NO_DXT5nm) && defined(_NORMALMAP)
+        return SafeNormalize(normalWS);
+    #else
+        return normalize(normalWS);
+    #endif
+}
+
+float3 NormalizeNormalPerPixel(float3 normalWS)
+{
+    #if defined(UNITY_NO_DXT5nm) && defined(_NORMALMAP)
+        return SafeNormalize(normalWS);
+    #else
+        return normalize(normalWS);
+    #endif
 }
 
 // Constants that represent material surface types
@@ -268,6 +363,70 @@ half3 MixFog(half3 fragColor, half fogFactor)
 float3 MixFog(float3 fragColor, float fogFactor)
 {
     return MixFogColor(fragColor, unity_FogColor.rgb, fogFactor);
+}
+
+// Linear depth buffer value between [0, 1] or [1, 0] to eye depth value between [near, far]
+half LinearDepthToEyeDepth(half rawDepth)
+{
+    #if UNITY_REVERSED_Z
+    return half(_ProjectionParams.z - (_ProjectionParams.z - _ProjectionParams.y) * rawDepth);
+    #else
+    return half(_ProjectionParams.y + (_ProjectionParams.z - _ProjectionParams.y) * rawDepth);
+    #endif
+}
+
+float LinearDepthToEyeDepth(float rawDepth)
+{
+    #if UNITY_REVERSED_Z
+    return _ProjectionParams.z - (_ProjectionParams.z - _ProjectionParams.y) * rawDepth;
+    #else
+    return _ProjectionParams.y + (_ProjectionParams.z - _ProjectionParams.y) * rawDepth;
+    #endif
+}
+
+void TransformScreenUV(inout float2 uv, float screenHeight)
+{
+    #if UNITY_UV_STARTS_AT_TOP
+    uv.y = screenHeight - (uv.y * _ScaleBiasRt.x + _ScaleBiasRt.y * screenHeight);
+    #endif
+}
+
+void TransformScreenUV(inout float2 uv)
+{
+    #if UNITY_UV_STARTS_AT_TOP
+    TransformScreenUV(uv, GetScaledScreenParams().y);
+    #endif
+}
+
+void TransformNormalizedScreenUV(inout float2 uv)
+{
+    #if UNITY_UV_STARTS_AT_TOP
+    TransformScreenUV(uv, 1.0);
+    #endif
+}
+
+float2 GetNormalizedScreenSpaceUV(float2 positionCS)
+{
+    float2 normalizedScreenSpaceUV = positionCS.xy * rcp(GetScaledScreenParams().xy);
+    TransformNormalizedScreenUV(normalizedScreenSpaceUV);
+    return normalizedScreenSpaceUV;
+}
+
+float2 GetNormalizedScreenSpaceUV(float4 positionCS)
+{
+    return GetNormalizedScreenSpaceUV(positionCS.xy);
+}
+
+void ApplyPerPixelDisplacement(half3 viewDirTS, inout float2 uv)
+{
+    #if defined(_PARALLAXMAP)
+    uv += ParallaxMapping(TEXTURE2D_ARGS(_ParallaxMap, sampler_ParallaxMap), viewDirTS, _Parallax, uv);
+    #endif
+}
+
+uint GetMeshRenderingLayer()
+{
+    return asuint(unity_RenderingLayer.x);
 }
 
 #endif

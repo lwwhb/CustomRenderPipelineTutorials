@@ -29,7 +29,7 @@ namespace LiteRP
                     float smoothDeltaTime = Time.smoothDeltaTime;
 
                     ClearRenderingState(cmd);
-                    //SetShaderTimeValues(cmd, time, deltaTime, smoothDeltaTime);
+                    SetShaderTimeValues(cmd, time, deltaTime, smoothDeltaTime);
                 });
             }
         }
@@ -42,10 +42,12 @@ namespace LiteRP
             cmd.SetKeyword(ShaderGlobalKeywords.SoftShadowsLow, false);
             cmd.SetKeyword(ShaderGlobalKeywords.SoftShadowsMedium, false);
             cmd.SetKeyword(ShaderGlobalKeywords.SoftShadowsHigh, false);
+            
+            cmd.SetKeyword(ShaderGlobalKeywords.AdditionalLights, false);
         }
         private void SetShaderTimeValues(IBaseCommandBuffer cmd, float time, float deltaTime, float smoothDeltaTime)
         {
-            /*float timeEights = time / 8f;
+            float timeEights = time / 8f;
             float timeFourth = time / 4f;
             float timeHalf = time / 2f;
 
@@ -64,7 +66,7 @@ namespace LiteRP
             cmd.SetGlobalVector(ShaderPropertyId.cosTime, cosTimeVector);
             cmd.SetGlobalVector(ShaderPropertyId.deltaTime, deltaTimeVector);
             cmd.SetGlobalVector(ShaderPropertyId.timeParameters, timeParametersVector);
-            cmd.SetGlobalVector(ShaderPropertyId.lastTimeParameters, lastTimeParametersVector);*/
+            cmd.SetGlobalVector(ShaderPropertyId.lastTimeParameters, lastTimeParametersVector);
         }
     }
 }

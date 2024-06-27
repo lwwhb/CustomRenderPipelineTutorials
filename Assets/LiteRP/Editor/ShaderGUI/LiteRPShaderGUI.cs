@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Rendering;
-using UnityEditor.ShaderGraph;
-using UnityEditor.ShaderGraph.Drawing;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static LiteRP.Editor.ShaderUtils;
 using Styles = LiteRP.Editor.LiteRPShaderGUIHelper.Styles;
 namespace LiteRP.Editor
 {
@@ -211,10 +209,6 @@ namespace LiteRP.Editor
         {
             // 绘制BaseMap
             LiteRPShaderGUIHelper.DrawBaseProperties(m_MaterialEditor, m_BaseMapProperty, m_BaseColorProperty);
-            LiteRPShaderGUIHelper.DrawTileOffset(m_MaterialEditor, m_BaseMapProperty);
-            
-            // 绘制EmissionMap
-            LiteRPShaderGUIHelper.DrawEmissionProperties(m_MaterialEditor, m_EmissionMapProperty, m_EmissionColorProperty, true);
         }
         
         // 绘制advanced options GUI
@@ -228,6 +222,18 @@ namespace LiteRP.Editor
             }
             
             m_MaterialEditor.EnableInstancingField();
+        }
+        
+        public override void AssignNewShaderToMaterial(Material material, Shader oldShader, Shader newShader)
+        {
+            // Clear all keywords for fresh start
+            // Note: this will nuke user-selected custom keywords when they change shaders
+            material.shaderKeywords = null;
+
+            base.AssignNewShaderToMaterial(material, oldShader, newShader);
+
+            // Setup keywords based on the new shader
+            UpdateMaterial(material, ShaderUtils.MaterialUpdateType.ChangedAssignedShader);
         }
     }
 }

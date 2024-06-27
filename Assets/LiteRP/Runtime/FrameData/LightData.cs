@@ -43,11 +43,6 @@ namespace LiteRP.FrameData
         /// True if blending is enabled for reflection probes.
         /// </summary>
         public bool reflectionProbeBlending;
-
-        /// <summary>
-        /// True if light layers are enabled.
-        /// </summary>
-        public bool supportsLightLayers;
         
         public override void Reset()
         {
@@ -58,7 +53,6 @@ namespace LiteRP.FrameData
             supportsMixedLighting = false;
             reflectionProbeBoxProjection = false;
             reflectionProbeBlending = false;
-            supportsLightLayers = false;
         }
     }
 }

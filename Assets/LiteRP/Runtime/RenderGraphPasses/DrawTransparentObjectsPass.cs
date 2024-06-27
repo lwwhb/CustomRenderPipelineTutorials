@@ -18,7 +18,7 @@ namespace LiteRP
             using (var builder = renderGraph.AddRasterRenderPass<DrawTransparentObjectsPassData>("Draw Transparent Objects Pass", out var passData, s_DrawTransparentObjectsProfilingSampler))
             {
                 //创建半透明对象渲染列表
-                RendererListDesc transparentRendererDesc = new RendererListDesc(s_shaderTagId, cameraData.cullingResults, cameraData.camera);
+                RendererListDesc transparentRendererDesc = new RendererListDesc(s_shaderTagIds, cameraData.cullingResults, cameraData.camera);
                 transparentRendererDesc.sortingCriteria = SortingCriteria.CommonTransparent;
                 transparentRendererDesc.renderQueueRange = RenderQueueRange.transparent;
                 passData.transparentRendererListHandle = renderGraph.CreateRendererList(transparentRendererDesc);

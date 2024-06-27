@@ -7,15 +7,12 @@ using RenderQueue = UnityEngine.Rendering.RenderQueue;
 using SurfaceType = LiteRP.Editor.LiteRPShaderGUI.SurfaceType;
 using BlendMode = LiteRP.Editor.LiteRPShaderGUI.BlendMode;
 using RenderFace = LiteRP.Editor.LiteRPShaderGUI.RenderFace;
-using ZWriteControl = LiteRP.Editor.LiteRPShaderGUI.ZWriteControl;
-using ZTestMode = LiteRP.Editor.LiteRPShaderGUI.ZTestMode;
 using QueueControl = LiteRP.Editor.LiteRPShaderGUI.QueueControl;
 
 namespace LiteRP.Editor
 {
     internal static class LiteRPShaderProperty
     {
-        public static readonly string SpecularWorkflowMode = "_WorkflowMode";
         public static readonly string SurfaceType = "_Surface";
         public static readonly string BlendMode = "_Blend";
         public static readonly string AlphaClip = "_AlphaClip";
@@ -34,7 +31,21 @@ namespace LiteRP.Editor
         public static readonly string BaseMap = "_BaseMap";
         public static readonly string BaseColor = "_BaseColor";
         
+        // for lit shader
+        public static readonly string Metallic = "_Metallic";
+        public static readonly string MetallicGlossMap = "_MetallicGlossMap";
+        public static readonly string Smoothness = "_Smoothness";
+        public static readonly string SmoothnessTextureChannel = "_SmoothnessTextureChannel";
         public static readonly string NormalMap = "_BumpMap";
+        public static readonly string NormalScale = "_BumpScale";
+        public static readonly string ParallaxMap = "_ParallaxMap";
+        public static readonly string Parallax = "_Parallax";
+        public static readonly string OcclusionStrength = "_OcclusionStrength";
+        public static readonly string OcclusionMap = "_OcclusionMap";
+        
+        // for lit Advanced Props
+        public static readonly string SpecularHighlights = "_SpecularHighlights";
+        public static readonly string EnvironmentReflections = "_EnvironmentReflections";
             
         // for ShaderGraph shaders only
         public static readonly string ZTest = "_ZTest";

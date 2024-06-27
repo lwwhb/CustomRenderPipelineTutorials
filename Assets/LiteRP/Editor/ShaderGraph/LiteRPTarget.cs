@@ -2,7 +2,7 @@ using System;
 using UnityEditor.ShaderGraph;
 using UnityEngine.Rendering;
 
-namespace LiteRP.Editor
+namespace LiteRP.Editor.ShaderGraph
 {
     sealed class LiteRPTarget : Target
     {
