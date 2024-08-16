@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: LiteRP_Unlit_Transparency
-  m_Shader: {fileID: 4800000, guid: a9316d8cae61a45d6bf26d5d6216b3c4, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9cbc9e7dbec144836937649aa8de3982, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -87,6 +87,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
+    - _ReceiveShadows: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5

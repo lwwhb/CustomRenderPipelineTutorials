@@ -8,7 +8,7 @@ namespace LiteRP.Editor.ShaderGraph
     {
         public LiteRPTarget()
         {
-            displayName = "LiteRP";
+            displayName = "LiteRenderPipeline";
         }
 
         public override bool IsActive()

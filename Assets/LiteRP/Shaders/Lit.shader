@@ -1,4 +1,4 @@
-Shader "LiteRP/Lit"
+Shader "LiteRenderPipeline/Lit"
 {
     Properties
     {
@@ -50,11 +50,16 @@ Shader "LiteRP/Lit"
         // Shader 代码
         Tags { 
             "RenderType"="Opaque" 
-            "RenderPipeline" = "LiteRP"
+            "RenderPipeline" = "LiteRenderPipeline"
             "LiteRPMaterialType" = "Lit"
             "IgnoreProjector" = "True"
         }
-        LOD 300
+        LOD 100
+        
+        // Render State Commands
+        Blend[_SrcBlend][_DstBlend], [_SrcBlendAlpha][_DstBlendAlpha]
+        ZWrite[_ZWrite]
+        Cull[_Cull]
         
         Pass
         {
@@ -63,10 +68,7 @@ Shader "LiteRP/Lit"
             {
                 "LightMode" = "LiteRPForward"
             }
-            // Render State Commands
-            Blend[_SrcBlend][_DstBlend], [_SrcBlendAlpha][_DstBlendAlpha]
-            ZWrite[_ZWrite]
-            Cull[_Cull]
+            
             AlphaToMask[_AlphaToMask]
             
             HLSLPROGRAM
@@ -141,6 +143,7 @@ Shader "LiteRP/Lit"
             ENDHLSL
         }
     }
-    Fallback "Hidden/LiteRP/FallbackError"
+
+    Fallback "Hidden/LiteRenderPipeline/FallbackError"
     CustomEditor "LiteRP.Editor.LitShaderGUI"
 }

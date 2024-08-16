@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.unity.ide.rider": "3.0.28",
+    "com.unity.ide.rider": "3.0.31",
     "com.unity.render-pipelines.core": "17.0.3",
     "com.unity.shadergraph": "17.0.3",
     "com.unity.modules.accessibility": "1.0.0",
