@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: LiteRP_Unlit_CutOff
-  m_Shader: {fileID: 4800000, guid: 9cbc9e7dbec144836937649aa8de3982, type: 3}
+  m_Shader: {fileID: 4800000, guid: 55318858aa81a4be2b17105269100f0d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
