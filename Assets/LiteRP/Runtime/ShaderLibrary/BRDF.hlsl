@@ -78,19 +78,26 @@ inline void InitializeBRDFDataDirect(half3 diffuse, half3 specular, half reflect
 }
 
 // Initialize BRDFData for material, managing both specular and metallic setup using shader keyword _SPECULAR_SETUP.
-inline void InitializeBRDFData(half3 albedo, half metallic, half smoothness, inout half alpha, out BRDFData outBRDFData)
+inline void InitializeBRDFData(half3 albedo, half metallic, half3 specular, half smoothness, inout half alpha, out BRDFData outBRDFData)
 {
-    half oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
-    half reflectivity = half(1.0) - oneMinusReflectivity;
-    half3 brdfDiffuse = albedo * oneMinusReflectivity;
-    half3 brdfSpecular = lerp(kDielectricSpec.rgb, albedo, metallic);
+    #ifdef _SPECULAR_SETUP
+        half reflectivity = ReflectivitySpecular(specular);
+        half oneMinusReflectivity = half(1.0) - reflectivity;
+        half3 brdfDiffuse = albedo * oneMinusReflectivity;
+        half3 brdfSpecular = specular;
+    #else
+        half oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
+        half reflectivity = half(1.0) - oneMinusReflectivity;
+        half3 brdfDiffuse = albedo * oneMinusReflectivity;
+        half3 brdfSpecular = lerp(kDielectricSpec.rgb, albedo, metallic);
+    #endif
 
     InitializeBRDFDataDirect(albedo, brdfDiffuse, brdfSpecular, reflectivity, oneMinusReflectivity, smoothness, alpha, outBRDFData);
 }
 
 inline void InitializeBRDFData(inout LitSurfaceData surfaceData, out BRDFData brdfData)
 {
-    InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.smoothness, surfaceData.alpha, brdfData);
+    InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
 }
 
 half3 ConvertF0ForClearCoat15(half3 f0)

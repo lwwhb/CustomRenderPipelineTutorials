@@ -5,6 +5,11 @@ namespace LiteRP.Editor
 {
     internal static class LitShaderHelper
     {
+        public enum WorkflowMode
+        {
+            Specular = 0,
+            Metallic
+        }
         public enum SmoothnessMapChannel
         {
             MetallicAlpha,
@@ -27,9 +32,24 @@ namespace LiteRP.Editor
             return SmoothnessMapChannel.MetallicAlpha;
         }
         
+        // (shared by all lit shaders, including shadergraph Lit Target and Lit.shader)
+        internal static void SetupSpecularWorkflowKeyword(Material material, out bool isSpecularWorkflow)
+        {
+            isSpecularWorkflow = false;     // default is metallic workflow
+            if (material.HasProperty(LiteRPShaderProperty.SpecularWorkflowMode))
+                isSpecularWorkflow = ((WorkflowMode)material.GetFloat(LiteRPShaderProperty.SpecularWorkflowMode)) == WorkflowMode.Specular;
+            CoreUtils.SetKeyword(material, "_SPECULAR_SETUP", isSpecularWorkflow);
+        }
+        
         public static void SetMaterialKeywords(Material material)
         {
-            var hasGlossMap = material.GetTexture("_MetallicGlossMap") != null;
+            SetupSpecularWorkflowKeyword(material, out bool isSpecularWorkFlow);
+
+            // Note: keywords must be based on Material value not on MaterialProperty due to multi-edit & material animation
+            // (MaterialProperty value might come from renderer material property block)
+            var specularGlossMap = isSpecularWorkFlow ? "_SpecGlossMap" : "_MetallicGlossMap";
+            var hasGlossMap = material.GetTexture(specularGlossMap) != null;
+
             CoreUtils.SetKeyword(material, "_METALLICSPECGLOSSMAP", hasGlossMap);
 
             if (material.HasProperty("_SpecularHighlights"))

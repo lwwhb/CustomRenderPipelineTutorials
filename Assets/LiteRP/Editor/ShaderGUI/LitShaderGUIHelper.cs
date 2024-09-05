@@ -8,6 +8,18 @@ namespace LiteRP.Editor
         public static class Styles
         {
             /// <summary>
+            /// The text and tooltip for the workflow Mode GUI.
+            /// </summary>
+            public static GUIContent workflowModeText = EditorGUIUtility.TrTextContent("Workflow Mode",
+                "Select a workflow that fits your textures. Choose between Metallic or Specular.");
+            
+            /// <summary>
+            /// The text and tooltip for the specular Map GUI.
+            /// </summary>
+            public static GUIContent specularMapText = EditorGUIUtility.TrTextContent("Specular Map", 
+                "Designates a Specular Map and specular color determining the apperance of reflections on this Material's surface.");
+            
+            /// <summary>
             /// The text and tooltip for the metallic Map GUI.
             /// </summary>
             public static GUIContent metallicMapText =
@@ -55,17 +67,38 @@ namespace LiteRP.Editor
             /// The names for smoothness alpha options available for metallic workflow.
             /// </summary>
             public static readonly string[] metallicSmoothnessChannelNames = { "Metallic Alpha", "Albedo Alpha" };
+            /// <summary>
+            /// The names for smoothness alpha options available for specular workflow.
+            /// </summary>
+            public static readonly string[] specularSmoothnessChannelNames = { "Specular Alpha", "Albedo Alpha" };
         }
-        public static void DrawMetallicProperties(MaterialEditor materialEditor, Material material, 
+        public static void DrawMetallicSpecularProperties(MaterialEditor materialEditor, 
+            Material material, MaterialProperty workflowProperty, 
             MaterialProperty metallicProperty, MaterialProperty metallicGlossMapProperty, 
+            MaterialProperty specularProperty, MaterialProperty specularGlossMapProperty,
             MaterialProperty smoothnessProperty, MaterialProperty smoothnessMapChannelProperty)
         {
-            bool hasGlossMap = metallicGlossMapProperty.textureValue != null;
-            materialEditor.TexturePropertySingleLine(Styles.metallicMapText, metallicGlossMapProperty,
-                hasGlossMap ? null : metallicProperty);
-            DrawSmoothness(materialEditor, material, smoothnessProperty, smoothnessMapChannelProperty);
+            string[] smoothnessChannelNames;
+            bool hasGlossMap = false;
+            if (workflowProperty == null ||
+                (LitShaderHelper.WorkflowMode)workflowProperty.floatValue == LitShaderHelper.WorkflowMode.Metallic)
+            {
+                hasGlossMap = metallicGlossMapProperty.textureValue != null;
+                smoothnessChannelNames = Styles.metallicSmoothnessChannelNames;
+                materialEditor.TexturePropertySingleLine(Styles.metallicMapText, metallicGlossMapProperty,
+                    hasGlossMap ? null : metallicProperty);
+            }
+            else
+            {
+                hasGlossMap = specularGlossMapProperty.textureValue != null;
+                smoothnessChannelNames = Styles.specularSmoothnessChannelNames;
+                LiteRPShaderGUIHelper.TextureColorProperties(materialEditor, Styles.specularMapText, specularGlossMapProperty,
+                    hasGlossMap ? null : specularProperty);
+            }
+            DrawSmoothness(materialEditor, material, smoothnessProperty, smoothnessMapChannelProperty, smoothnessChannelNames);
         }
-        private static void DrawSmoothness(MaterialEditor materialEditor, Material material, MaterialProperty smoothness, MaterialProperty smoothnessMapChannel)
+        
+        private static void DrawSmoothness(MaterialEditor materialEditor, Material material, MaterialProperty smoothness, MaterialProperty smoothnessMapChannel, string[] smoothnessChannelNames)
         {
             EditorGUI.indentLevel += 2;
 
@@ -81,7 +114,7 @@ namespace LiteRP.Editor
                     MaterialEditor.BeginProperty(smoothnessMapChannel);
                     EditorGUI.BeginChangeCheck();
                     var smoothnessSource = (int)smoothnessMapChannel.floatValue;
-                    smoothnessSource = EditorGUILayout.Popup(Styles.smoothnessMapChannelText, smoothnessSource, Styles.metallicSmoothnessChannelNames);
+                    smoothnessSource = EditorGUILayout.Popup(Styles.smoothnessMapChannelText, smoothnessSource, smoothnessChannelNames);
                     if (EditorGUI.EndChangeCheck())
                         smoothnessMapChannel.floatValue = smoothnessSource;
                     MaterialEditor.EndProperty();
@@ -89,7 +122,7 @@ namespace LiteRP.Editor
                 else
                 {
                     EditorGUI.BeginDisabledGroup(true);
-                    EditorGUILayout.Popup(Styles.smoothnessMapChannelText, 0, Styles.metallicSmoothnessChannelNames);
+                    EditorGUILayout.Popup(Styles.smoothnessMapChannelText, 0, smoothnessChannelNames);
                     EditorGUI.EndDisabledGroup();
                 }
                 EditorGUI.showMixedValue = false;

@@ -13,6 +13,7 @@ namespace LiteRP.Editor
 {
     internal static class LiteRPShaderProperty
     {
+        public static readonly string SpecularWorkflowMode = "_WorkflowMode";
         public static readonly string SurfaceType = "_Surface";
         public static readonly string BlendMode = "_Blend";
         public static readonly string AlphaClip = "_AlphaClip";
@@ -34,6 +35,8 @@ namespace LiteRP.Editor
         // for lit shader
         public static readonly string Metallic = "_Metallic";
         public static readonly string MetallicGlossMap = "_MetallicGlossMap";
+        public static readonly string SpecColor = "_SpecColor";
+        public static readonly string SpecGlossMap = "_SpecGlossMap";
         public static readonly string Smoothness = "_Smoothness";
         public static readonly string SmoothnessTextureChannel = "_SmoothnessTextureChannel";
         public static readonly string NormalMap = "_BumpMap";

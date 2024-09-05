@@ -1,14 +1,21 @@
 using System;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 namespace LiteRP.Editor
 {
     internal class LitShaderGUI : LiteRPShaderGUI
     {
+        static readonly string[] workflowModeNames = Enum.GetNames(typeof(LitShaderHelper.WorkflowMode));
+        // The workflow mode Props.
+        protected MaterialProperty m_WorkflowModeProperty{ get; set; }
+        
         // Surface Input Props
         protected MaterialProperty m_MetallicProperty { get; set; }
+        protected MaterialProperty m_SpecularProperty { get; set; }
         protected MaterialProperty m_MetallicGlossMapProperty { get; set; }
+        protected MaterialProperty m_SpecularGlossMapProperty { get; set; }
         protected MaterialProperty m_SmoothnessProperty { get; set; }
         protected MaterialProperty m_SmoothnessMapChannelProperty { get; set; }
         protected MaterialProperty m_BumpMapPropProperty { get; set; }
@@ -31,9 +38,14 @@ namespace LiteRP.Editor
         {
             base.FindProperties(properties);
             
+            // Surface Option Props
+            m_WorkflowModeProperty = FindProperty(LiteRPShaderProperty.SpecularWorkflowMode, properties, false);
+            
             // Surface Input Props
             m_MetallicProperty = FindProperty(LiteRPShaderProperty.Metallic, properties);
+            m_SpecularProperty = FindProperty(LiteRPShaderProperty.SpecColor, properties,false);
             m_MetallicGlossMapProperty = FindProperty(LiteRPShaderProperty.MetallicGlossMap, properties);
+            m_SpecularGlossMapProperty = FindProperty(LiteRPShaderProperty.SpecGlossMap, properties, false);
             m_SmoothnessProperty = FindProperty(LiteRPShaderProperty.Smoothness, properties, false);
             m_SmoothnessMapChannelProperty = FindProperty(LiteRPShaderProperty.SmoothnessTextureChannel, properties, false);
             m_BumpMapPropProperty = FindProperty(LiteRPShaderProperty.NormalMap, properties, false);
@@ -84,17 +96,38 @@ namespace LiteRP.Editor
             {
                 material.EnableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
             }
-
-            Texture texture = material.GetTexture("_MetallicGlossMap");
-            if (texture != null)
-                material.SetTexture("_MetallicSpecGlossMap", texture);
+            
+            if (oldShader.name.Equals("Standard (Specular setup)"))
+            {
+                material.SetFloat("_WorkflowMode", (float)LitShaderHelper.WorkflowMode.Specular);
+                Texture texture = material.GetTexture("_SpecGlossMap");
+                if (texture != null)
+                    material.SetTexture("_MetallicSpecGlossMap", texture);
+            }
+            else
+            {
+                material.SetFloat("_WorkflowMode", (float)LitShaderHelper.WorkflowMode.Metallic);
+                Texture texture = material.GetTexture("_MetallicGlossMap");
+                if (texture != null)
+                    material.SetTexture("_MetallicSpecGlossMap", texture);
+            }
         }
-        
+        public override void DrawSurfaceOptions(Material material)
+        {
+            // Use default labelWidth
+            EditorGUIUtility.labelWidth = 0f;
+
+            if (m_WorkflowModeProperty != null)
+                m_MaterialEditor.PopupShaderProperty(m_WorkflowModeProperty, LitShaderGUIHelper.Styles.workflowModeText,workflowModeNames);
+
+            base.DrawSurfaceOptions(material);
+        }
         public override void DrawSurfaceInputs(Material material)
         {
             base.DrawSurfaceInputs(material);
-            LitShaderGUIHelper.DrawMetallicProperties(m_MaterialEditor, material, 
+            LitShaderGUIHelper.DrawMetallicSpecularProperties(m_MaterialEditor, material, m_WorkflowModeProperty,
                 m_MetallicProperty, m_MetallicGlossMapProperty, 
+                m_SpecularProperty, m_SpecularGlossMapProperty, 
                 m_SmoothnessProperty, m_SmoothnessMapChannelProperty);
             LiteRPShaderGUIHelper.DrawNormalProperties(m_MaterialEditor, m_BumpMapPropProperty, m_BumpScalePropProperty);
 

@@ -6,6 +6,7 @@
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseMap_ST;
     half4 _BaseColor;
+    half4 _SpecColor;
     half4 _EmissionColor;
     half _Cutoff;
     half _Smoothness;
@@ -19,10 +20,18 @@ CBUFFER_END
 TEXTURE2D(_ParallaxMap);        SAMPLER(sampler_ParallaxMap);
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);
+TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
+
+#ifdef _SPECULAR_SETUP
+#define SAMPLE_METALLICSPECULAR(uv) SAMPLE_TEXTURE2D(_SpecGlossMap, sampler_SpecGlossMap, uv)
+#else
+#define SAMPLE_METALLICSPECULAR(uv) SAMPLE_TEXTURE2D(_MetallicGlossMap, sampler_MetallicGlossMap, uv)
+#endif
 
 #ifdef UNITY_DOTS_INSTANCING_ENABLED
 UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
     UNITY_DOTS_INSTANCED_PROP(float4, _BaseColor)
+    UNITY_DOTS_INSTANCED_PROP(float4, _SpecColor)
     UNITY_DOTS_INSTANCED_PROP(float4, _EmissionColor)
     UNITY_DOTS_INSTANCED_PROP(float , _Cutoff)
     UNITY_DOTS_INSTANCED_PROP(float , _Smoothness)
@@ -34,6 +43,7 @@ UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
 UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
 
 static float4 unity_DOTS_Sampled_BaseColor;
+static float4 unity_DOTS_Sampled_SpecColor;
 static float4 unity_DOTS_Sampled_EmissionColor;
 static float  unity_DOTS_Sampled_Cutoff;
 static float  unity_DOTS_Sampled_Smoothness;
@@ -46,6 +56,7 @@ static float  unity_DOTS_Sampled_Surface;
 void SetupDOTSLitMaterialPropertyCaches()
 {
     unity_DOTS_Sampled_BaseColor            = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float4, _BaseColor);
+    unity_DOTS_Sampled_SpecColor            = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float4, _SpecColor);
     unity_DOTS_Sampled_EmissionColor        = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float4, _EmissionColor);
     unity_DOTS_Sampled_Cutoff               = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _Cutoff);
     unity_DOTS_Sampled_Smoothness           = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _Smoothness);
@@ -60,6 +71,7 @@ void SetupDOTSLitMaterialPropertyCaches()
 #define UNITY_SETUP_DOTS_MATERIAL_PROPERTY_CACHES() SetupDOTSUnlitMaterialPropertyCaches()
 
 #define _BaseColor              unity_DOTS_Sampled_BaseColor
+#define _SpecColor              unity_DOTS_Sampled_SpecColor
 #define _EmissionColor          unity_DOTS_Sampled_EmissionColor
 #define _Cutoff                 unity_DOTS_Sampled_Cutoff
 #define _Smoothness             unity_DOTS_Sampled_Smoothness
