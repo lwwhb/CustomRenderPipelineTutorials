@@ -50,6 +50,13 @@ namespace LiteRP.Editor
             public static GUIContent reflectionsText =
                 EditorGUIUtility.TrTextContent("Environment Reflections",
                     "When enabled, the Material samples reflections from the nearest Reflection Probes or Lighting Probe.");
+            
+            /// <summary>
+            /// The text and tooltip for the optimized BRDF GUI.
+            /// </summary>
+            public static GUIContent optimizedBRDFText =
+                EditorGUIUtility.TrTextContent("Optimized BRDF",
+                    "When enabled, use URP BRDF or use Disney BRDF.");
 
             /// <summary>
             /// The text and tooltip for the height map GUI.

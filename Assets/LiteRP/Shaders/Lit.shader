@@ -21,6 +21,7 @@ Shader "LiteRenderPipeline/Lit"
         
         [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
         [ToggleOff] _EnvironmentReflections("Environment Reflections", Float) = 1.0
+        [ToggleOff] _OptimizedBRDF("Optimized BRDF", Float) = 0.0
 
         _BumpScale("Scale", Float) = 1.0
         _BumpMap("Normal Map", 2D) = "bump" {}
@@ -94,6 +95,7 @@ Shader "LiteRenderPipeline/Lit"
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
             #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+            #pragma shader_feature_local_fragment _OPTIMIZED_BRDF_OFF
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
             
             // LiteRP keywords

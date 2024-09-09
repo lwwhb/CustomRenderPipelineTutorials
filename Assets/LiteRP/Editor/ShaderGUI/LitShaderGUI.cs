@@ -27,6 +27,7 @@ namespace LiteRP.Editor
         // Advanced Props
         protected MaterialProperty m_HighlightsProperty { get; set; }
         protected MaterialProperty m_ReflectionsProperty { get; set; }
+        protected MaterialProperty m_OptimizedBRDFProperty { get; set; }
         
             
         public override void ValidateMaterial(Material material)
@@ -58,6 +59,7 @@ namespace LiteRP.Editor
             // Advanced Props
             m_HighlightsProperty = FindProperty(LiteRPShaderProperty.SpecularHighlights, properties, false);
             m_ReflectionsProperty = FindProperty(LiteRPShaderProperty.EnvironmentReflections, properties, false);
+            m_OptimizedBRDFProperty = FindProperty(LiteRPShaderProperty.OptimizedBRDF, properties, false);
         }
         
         public override void AssignNewShaderToMaterial(Material material, Shader oldShader, Shader newShader)
@@ -147,6 +149,7 @@ namespace LiteRP.Editor
             {
                 m_MaterialEditor.ShaderProperty(m_HighlightsProperty, LitShaderGUIHelper.Styles.highlightsText);
                 m_MaterialEditor.ShaderProperty(m_ReflectionsProperty, LitShaderGUIHelper.Styles.reflectionsText);
+                m_MaterialEditor.ShaderProperty(m_OptimizedBRDFProperty, LitShaderGUIHelper.Styles.optimizedBRDFText);
             }
 
             base.DrawAdvancedOptions(material);

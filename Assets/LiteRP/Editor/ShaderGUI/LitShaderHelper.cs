@@ -58,6 +58,9 @@ namespace LiteRP.Editor
             if (material.HasProperty("_EnvironmentReflections"))
                 CoreUtils.SetKeyword(material, "_ENVIRONMENTREFLECTIONS_OFF",
                     material.GetFloat("_EnvironmentReflections") == 0.0f);
+            if (material.HasProperty("_OptimizedBRDF"))
+                CoreUtils.SetKeyword(material, "_OPTIMIZED_BRDF_OFF",
+                    material.GetFloat("_OptimizedBRDF") == 1.0f);
             if (material.HasProperty("_OcclusionMap"))
                 CoreUtils.SetKeyword(material, "_OCCLUSIONMAP", material.GetTexture("_OcclusionMap"));
 

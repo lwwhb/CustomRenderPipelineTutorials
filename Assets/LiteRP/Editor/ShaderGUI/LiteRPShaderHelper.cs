@@ -49,6 +49,7 @@ namespace LiteRP.Editor
         // for lit Advanced Props
         public static readonly string SpecularHighlights = "_SpecularHighlights";
         public static readonly string EnvironmentReflections = "_EnvironmentReflections";
+        public static readonly string OptimizedBRDF = "_OptimizedBRDF";
             
         // for ShaderGraph shaders only
         public static readonly string ZTest = "_ZTest";
