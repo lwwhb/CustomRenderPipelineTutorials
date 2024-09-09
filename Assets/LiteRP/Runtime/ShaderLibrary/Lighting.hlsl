@@ -14,13 +14,13 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
 {
     half NdotL = saturate(dot(normalWS, lightDirectionWS));
     half3 radiance = lightColor * (lightAttenuation * NdotL);
-
+    
     half3 brdf = brdfData.diffuse;
 #ifndef _SPECULARHIGHLIGHTS_OFF
     [branch] if (!specularHighlightsOff)
     {
         #ifndef _OPTIMIZED_BRDF_OFF
-            brdf += DirectBRDFSpecularColor(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
+            brdf += DirectBRDFSpecularColor(brdfData, normalWS, lightDirectionWS, viewDirectionWS, NdotL);
         #else
             brdf += brdfData.specular * DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
         #endif
@@ -81,8 +81,8 @@ half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
     lightingColor += lightingData.giColor;
     lightingColor += lightingData.mainLightColor;
     lightingColor += lightingData.additionalLightsColor;
-    lightingColor += lightingData.emissionColor;
     lightingColor *= albedo;
+    lightingColor += lightingData.emissionColor;
     return lightingColor;
 }
 

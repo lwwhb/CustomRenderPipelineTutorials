@@ -213,27 +213,20 @@ half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionW
     return specularTerm;
 }
 
-half3 DirectBRDFSpecularColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS)
+half3 DirectBRDFSpecularColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, half NoL)
 {
     float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
     float3 halfDir = SafeNormalize(lightDirectionWSFloat3 + float3(viewDirectionWS));
 
-    float NoH = saturate(dot(float3(normalWS), halfDir));
-    half NoL = half(saturate(dot(normalWS, lightDirectionWS)));
-    half NoV = half(saturate(dot(normalWS, viewDirectionWS)));
-    half VoH = half(saturate(dot(viewDirectionWS, halfDir)));
+    half NoH = saturate(dot(normalWS, halfDir));
+    half NoV = saturate(dot(normalWS, viewDirectionWS));
+    half HoV = saturate(dot(halfDir, viewDirectionWS));
     
     // Fresnel
-    half3 F = F_Schlick(brdfData.specular, VoH);
+    half3 F = F_Schlick(brdfData.specular, HoV);
     // Distribution and Visiable for optimize
     half DV = DV_SmithJointGGX(NoH, NoL, NoV, brdfData.roughness);
     half3 specularColor = F * DV;
-
-    /*// Distribution
-    half D = D_GGX(NoH, brdfData.roughness);
-    // Visiable
-    half V = V_SmithJointGGX(NoL,NoV,brdfData.roughness);
-    half3 specularColor = F * D * V;*/
 
     return specularColor;
 }
