@@ -1,8 +1,7 @@
 #ifndef LITERP_LIGHTING_INCLUDED
 #define LITERP_LIGHTING_INCLUDED
 
-#include "BRDF.hlsl"
-#include "RealtimeLights.hlsl"
+#include "GlobalIllumination.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////
 //                      Lighting Functions                                   //
@@ -14,8 +13,12 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
 {
     half NdotL = saturate(dot(normalWS, lightDirectionWS));
     half3 radiance = lightColor * (lightAttenuation * NdotL);
-    
-    half3 brdf = brdfData.diffuse;
+
+    #ifndef _OPTIMIZED_BRDF_OFF
+        half3 brdf = DirectBRDFDiffuseColor(brdfData, normalWS, lightDirectionWS, viewDirectionWS, NdotL);
+    #else
+        half3 brdf = brdfData.diffuse;
+    #endif
 #ifndef _SPECULARHIGHLIGHTS_OFF
     [branch] if (!specularHighlightsOff)
     {
@@ -143,12 +146,18 @@ half4 LiteRPFragmentPBR(InputData inputData, LitSurfaceData surfaceData)
 
     // NOTE: can modify "surfaceData"...
     InitializeBRDFData(surfaceData, brdfData);
+    BRDFData brdfDataClearCoat = CreateClearCoatBRDFData(surfaceData, brdfData);
     
     Light mainLight = GetMainLight(inputData);
 
     LightingData lightingData = CreateLightingData(inputData, surfaceData);
-    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, inputData.normalWS, inputData.viewDirectionWS, specularHighlightsOff);
+    // lwwhb  ao临时为1 clearCoatMask为0
+    lightingData.giColor = GlobalIllumination(brdfData, brdfDataClearCoat, 0.0,
+                                              inputData.bakedGI, 1.0, inputData.positionWS,
+                                              inputData.normalWS, inputData.viewDirectionWS, inputData.normalizedScreenSpaceUV);
 
+    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, inputData.normalWS, inputData.viewDirectionWS, specularHighlightsOff);
+    
     #if defined(_ADDITIONAL_LIGHTS)
     uint pixelLightCount = GetAdditionalLightsCount();
     LIGHT_LOOP_BEGIN(pixelLightCount)

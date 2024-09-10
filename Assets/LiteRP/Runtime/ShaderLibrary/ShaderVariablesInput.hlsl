@@ -104,23 +104,28 @@ half4 _AdditionalLightsCount;
 #ifndef DOTS_INSTANCING_ON // UnityPerDraw cbuffer doesn't exist with hybrid renderer
     // Block Layout should be respected due to SRP Batcher
     CBUFFER_START(UnityPerDraw)
-    // Space block Feature
-    float4x4 unity_ObjectToWorld;
-    float4x4 unity_WorldToObject;
-    real4 unity_WorldTransformParams; // w is usually 1.0, or -1.0 for odd-negative scale transforms
+        // Space block Feature
+        float4x4 unity_ObjectToWorld;
+        float4x4 unity_WorldToObject;
+        real4 unity_WorldTransformParams; // w is usually 1.0, or -1.0 for odd-negative scale transforms
 
-    // Render Layer block feature
-    // Only the first channel (x) contains valid data and the float must be reinterpreted using asuint() to extract the original 32 bits values.
-    float4 unity_RenderingLayer;
+        // Render Layer block feature
+        // Only the first channel (x) contains valid data and the float must be reinterpreted using asuint() to extract the original 32 bits values.
+        float4 unity_RenderingLayer;
 
-    // Light Indices block feature
-    // These are set internally by the engine upon request by RendererConfiguration.
-    half4 unity_LightData;
-    half4 unity_LightIndices[2];
+        // Light Indices block feature
+        // These are set internally by the engine upon request by RendererConfiguration.
+        half4 unity_LightData;
+        half4 unity_LightIndices[2];
 
-    // Velocity
-    float4x4 unity_MatrixPreviousM;
-    float4x4 unity_MatrixPreviousMI;
+        // Reflection Probe 0 block feature
+        // HDR environment map decode instructions
+        real4 unity_SpecCube0_HDR;
+        //real4 unity_SpecCube1_HDR;    //lwwhb
+
+        // Velocity
+        float4x4 unity_MatrixPreviousM;
+        float4x4 unity_MatrixPreviousMI;
     CBUFFER_END
 #endif // UNITY_DOTS_INSTANCING_ENABLED
 
@@ -152,6 +157,21 @@ real4 unity_IndirectSpecColor;
 
 float4 unity_FogParams;
 real4  unity_FogColor;
+
+half4 _GlossyEnvironmentColor;
+//lwwhb
+//half4 _GlossyEnvironmentCubeMap_HDR;
+
+// ----------------------------------------------------------------------------
+
+// Unity specific
+TEXTURECUBE(unity_SpecCube0);
+SAMPLER(samplerunity_SpecCube0);
+TEXTURECUBE(unity_SpecCube1);
+SAMPLER(samplerunity_SpecCube1);
+//lwwhb
+//TEXTURECUBE(_GlossyEnvironmentCubeMap);
+//SAMPLER(sampler_GlossyEnvironmentCubeMap);
 
 // ----------------------------------------------------------------------------
 float4x4 glstate_matrix_projection;

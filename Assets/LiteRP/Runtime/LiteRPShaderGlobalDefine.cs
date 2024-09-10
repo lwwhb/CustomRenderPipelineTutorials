@@ -177,5 +177,16 @@ namespace LiteRP
         // MainLightShadowMapPass Const Buffer End
         
         // MainLightShadowMapPass MainLightShadowMapPass End
+        
+        // glossy and ambient Begin
+        public static readonly int glossyEnvironmentColor = Shader.PropertyToID("_GlossyEnvironmentColor");
+        //lwwhb
+        //public static readonly int glossyEnvironmentCubeMap = Shader.PropertyToID("_GlossyEnvironmentCubeMap");
+        //public static readonly int glossyEnvironmentCubeMapHDR = Shader.PropertyToID("_GlossyEnvironmentCubeMap_HDR");
+
+        public static readonly int ambientSkyColor = Shader.PropertyToID("unity_AmbientSky");
+        public static readonly int ambientEquatorColor = Shader.PropertyToID("unity_AmbientEquator");
+        public static readonly int ambientGroundColor = Shader.PropertyToID("unity_AmbientGround");
+        // glossy and ambient End
     }
 }

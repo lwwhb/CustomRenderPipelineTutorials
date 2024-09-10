@@ -96,6 +96,8 @@ namespace LiteRP
                 return;
             //为相机创建CommandBuffer
             CommandBuffer cmd = CommandBufferPool.Get();
+            //设置每个相机的Shader环境光参数
+            SetupPerCameraShaderConstants(cmd);
             //记录并执行渲染图
             RecordAndExecuteRenderGraph(context, camera, cmd);
             //提交命令缓冲区
@@ -204,6 +206,25 @@ namespace LiteRP
             shadowData.supportsSoftShadows = m_Asset.supportsSoftShadows && shadowData.supportMainLightShadow;
             
 ;           return true;
+        }
+        
+        private void SetupPerCameraShaderConstants(CommandBuffer cmd)
+        {
+            // When glossy reflections are OFF in the shader we set a constant color to use as indirect specular
+            SphericalHarmonicsL2 ambientSH = RenderSettings.ambientProbe;
+            Color linearGlossyEnvColor = new Color(ambientSH[0, 0], ambientSH[1, 0], ambientSH[2, 0]) * RenderSettings.reflectionIntensity;
+            Color glossyEnvColor = CoreUtils.ConvertLinearToActiveColorSpace(linearGlossyEnvColor);
+            cmd.SetGlobalVector(ShaderPropertyId.glossyEnvironmentColor, glossyEnvColor);
+            
+            //lwwhb
+            // Used as fallback cubemap for reflections
+            //cmd.SetGlobalTexture(ShaderPropertyId.glossyEnvironmentCubeMap, ReflectionProbe.defaultTexture);
+            //cmd.SetGlobalVector(ShaderPropertyId.glossyEnvironmentCubeMapHDR, ReflectionProbe.defaultTextureHDRDecodeValues);
+
+            // Ambient
+            cmd.SetGlobalVector(ShaderPropertyId.ambientSkyColor, CoreUtils.ConvertSRGBToActiveColorSpace(RenderSettings.ambientSkyColor));
+            cmd.SetGlobalVector(ShaderPropertyId.ambientEquatorColor, CoreUtils.ConvertSRGBToActiveColorSpace(RenderSettings.ambientEquatorColor));
+            cmd.SetGlobalVector(ShaderPropertyId.ambientGroundColor, CoreUtils.ConvertSRGBToActiveColorSpace(RenderSettings.ambientGroundColor));
         }
 
         private void RecordAndExecuteRenderGraph(ScriptableRenderContext context, Camera camera, CommandBuffer cmd)

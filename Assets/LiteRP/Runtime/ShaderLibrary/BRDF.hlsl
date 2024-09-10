@@ -212,7 +212,17 @@ half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionW
 
     return specularTerm;
 }
+half3 DirectBRDFDiffuseColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, half NoL)
+{
+    float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
+    
+    half NoV = saturate(dot(normalWS, viewDirectionWS));
+    half LoV = saturate(dot(lightDirectionWSFloat3, viewDirectionWS));
+    
+    half3 diffuseColor = brdfData.diffuse * DisneyDiffuseNoPI(NoV, NoL, LoV, brdfData.perceptualRoughness);
 
+    return diffuseColor;
+}
 half3 DirectBRDFSpecularColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, half NoL)
 {
     float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
@@ -226,7 +236,7 @@ half3 DirectBRDFSpecularColor(BRDFData brdfData, half3 normalWS, half3 lightDire
     half3 F = F_Schlick(brdfData.specular, HoV);
     // Distribution and Visiable for optimize
     half DV = DV_SmithJointGGX(NoH, NoL, NoV, brdfData.roughness);
-    half3 specularColor = F * DV;
+    half3 specularColor = F * DV * PI;
 
     return specularColor;
 }
