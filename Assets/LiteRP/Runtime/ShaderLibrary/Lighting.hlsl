@@ -11,11 +11,17 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
     half3 normalWS, half3 viewDirectionWS,
     half clearCoatMask, bool specularHighlightsOff)
 {
+    half3 halfDir = SafeNormalize(lightDirectionWS + viewDirectionWS);
+    
     half NdotL = saturate(dot(normalWS, lightDirectionWS));
+    half NdotH = saturate(dot(normalWS, halfDir));
+    
     half3 radiance = lightColor * (lightAttenuation * NdotL);
-
+    
     #ifndef _OPTIMIZED_BRDF_OFF
-        half3 brdf = DirectBRDFDiffuseColor(brdfData, normalWS, lightDirectionWS, viewDirectionWS, NdotL);
+        half NdotV = saturate(dot(normalWS, viewDirectionWS));
+        half LdotV = saturate(dot(lightDirectionWS, viewDirectionWS));
+        half3 brdf = DirectBRDFDiffuseColor(brdfData, NdotV, NdotL, LdotV);
     #else
         half3 brdf = brdfData.diffuse;
     #endif
@@ -23,9 +29,13 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
     [branch] if (!specularHighlightsOff)
     {
         #ifndef _OPTIMIZED_BRDF_OFF
-            brdf += DirectBRDFSpecularColor(brdfData, normalWS, lightDirectionWS, viewDirectionWS, NdotL);
+            half HdotV = saturate(dot(halfDir, viewDirectionWS));
+            brdf += DirectBRDFSpecularColor(brdfData, NdotH, NdotL, NdotV, HdotV);
         #else
-            brdf += brdfData.specular * DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
+            //lwwhb 指令优化，可能有效果差异，注意
+            //brdf += brdfData.specular * DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
+            half LdotH = saturate(dot(lightDirectionWS, halfDir));
+            brdf += brdfData.specular * DirectBRDFSpecularOpt(brdfData, NdotH, LdotH);
         #endif
     }
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)

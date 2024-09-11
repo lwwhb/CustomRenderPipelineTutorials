@@ -212,31 +212,74 @@ half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionW
 
     return specularTerm;
 }
-half3 DirectBRDFDiffuseColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, half NoL)
-{
-    float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
-    
-    half NoV = saturate(dot(normalWS, viewDirectionWS));
-    half LoV = saturate(dot(lightDirectionWSFloat3, viewDirectionWS));
-    
-    half3 diffuseColor = brdfData.diffuse * DisneyDiffuseNoPI(NoV, NoL, LoV, brdfData.perceptualRoughness);
 
+half DirectBRDFSpecularOpt(BRDFData brdfData, half NoH, half LoH)
+{
+    // GGX Distribution multiplied by combined approximation of Visibility and Fresnel
+    // BRDFspec = (D * V * F) / 4.0
+    // D = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2
+    // V * F = 1.0 / ( LoH^2 * (roughness + 0.5) )
+    // See "Optimizing PBR for Mobile" from Siggraph 2015 moving mobile graphics course
+    // https://community.arm.com/events/1155
+
+    // Final BRDFspec = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2 * (LoH^2 * (roughness + 0.5) * 4.0)
+    // We further optimize a few light invariant terms
+    // brdfData.normalizationTerm = (roughness + 0.5) * 4.0 rewritten as roughness * 4.0 + 2.0 to a fit a MAD.
+    float d = NoH * NoH * brdfData.roughness2MinusOne + 1.00001f;
+
+    half LoH2 = LoH * LoH;
+    half specularTerm = brdfData.roughness2 / ((d * d) * max(0.1h, LoH2) * brdfData.normalizationTerm);
+
+    // On platforms where half actually means something, the denominator has a risk of overflow
+    // clamp below was added specifically to "fix" that, but dx compiler (we convert bytecode to metal/gles)
+    // sees that specularTerm have only non-negative terms, so it skips max(0,..) in clamp (leaving only min(100,...))
+#if REAL_IS_HALF
+    specularTerm = specularTerm - HALF_MIN;
+    // Update: Conservative bump from 100.0 to 1000.0 to better match the full float specular look.
+    // Roughly 65504.0 / 32*2 == 1023.5,
+    // or HALF_MAX / ((mobile) MAX_VISIBLE_LIGHTS * 2),
+    // to reserve half of the per light range for specular and half for diffuse + indirect + emissive.
+    specularTerm = clamp(specularTerm, 0.0, 1000.0); // Prevent FP16 overflow on mobiles
+#endif
+
+    return specularTerm;
+}
+
+half3 DirectBRDFDiffuseColor(BRDFData brdfData, half NoV, half NoL, half LoV)
+{
+    half3 diffuseColor = brdfData.diffuse * DisneyDiffuseNoPI(NoV, NoL, LoV, brdfData.perceptualRoughness);
     return diffuseColor;
 }
-half3 DirectBRDFSpecularColor(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, half NoL)
-{
-    float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
-    float3 halfDir = SafeNormalize(lightDirectionWSFloat3 + float3(viewDirectionWS));
 
-    half NoH = saturate(dot(normalWS, halfDir));
-    half NoV = saturate(dot(normalWS, viewDirectionWS));
-    half HoV = saturate(dot(halfDir, viewDirectionWS));
-    
+// Inline D_GGX() * V_SmithJointGGX() together for better code generation.
+real DV_SmithJointGGXNoPI(real NdotH, real NdotL, real NdotV, real roughness, real partLambdaV)
+{
+    real a2 = Sq(roughness);
+    real s = (NdotH * a2 - NdotH) * NdotH + 1.0;
+
+    real lambdaV = NdotL * partLambdaV;
+    real lambdaL = NdotV * sqrt((-NdotL * a2 + NdotL) * NdotL + a2);
+
+    real2 D = real2(a2, s * s);            // Fraction without the multiplier (1/Pi)
+    real2 G = real2(1, lambdaV + lambdaL); // Fraction without the multiplier (1/2)
+
+    // This function is only used for direct lighting.
+    // If roughness is 0, the probability of hitting a punctual or directional light is also 0.
+    // Therefore, we return 0. The most efficient way to do it is with a max().
+    return 0.5 * (D.x * G.x) / max(D.y * G.y, REAL_MIN);
+}
+real DV_SmithJointGGXNoPI(real NdotH, real NdotL, real NdotV, real roughness)
+{
+    real partLambdaV = GetSmithJointGGXPartLambdaV(NdotV, roughness);
+    return DV_SmithJointGGXNoPI(NdotH, NdotL, NdotV, roughness, partLambdaV);
+}
+half3 DirectBRDFSpecularColor(BRDFData brdfData, half NoH, half NoL, half NoV, half HoV)
+{
     // Fresnel
     half3 F = F_Schlick(brdfData.specular, HoV);
     // Distribution and Visiable for optimize
-    half DV = DV_SmithJointGGX(NoH, NoL, NoV, brdfData.roughness);
-    half3 specularColor = F * DV * PI;
+    half DV = DV_SmithJointGGXNoPI(NoH, NoL, NoV, brdfData.roughness);
+    half3 specularColor = F * DV;
 
     return specularColor;
 }
