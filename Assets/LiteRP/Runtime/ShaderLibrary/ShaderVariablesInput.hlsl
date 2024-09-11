@@ -123,6 +123,19 @@ half4 _AdditionalLightsCount;
         real4 unity_SpecCube0_HDR;
         //real4 unity_SpecCube1_HDR;    //lwwhb
 
+        float4 unity_SpecCube0_BoxMax;          // w contains the blend distance
+        float4 unity_SpecCube0_BoxMin;          // w contains the lerp value
+        float4 unity_SpecCube0_ProbePosition;   // w is set to 1 for box projection
+
+        // SH block feature
+        real4 unity_SHAr;
+        real4 unity_SHAg;
+        real4 unity_SHAb;
+        real4 unity_SHBr;
+        real4 unity_SHBg;
+        real4 unity_SHBb;
+        real4 unity_SHC;
+
         // Velocity
         float4x4 unity_MatrixPreviousM;
         float4x4 unity_MatrixPreviousMI;

@@ -163,8 +163,8 @@ half4 LiteRPFragmentPBR(InputData inputData, LitSurfaceData surfaceData)
     LightingData lightingData = CreateLightingData(inputData, surfaceData);
     // lwwhb  ao临时为1 clearCoatMask为0
     lightingData.giColor = GlobalIllumination(brdfData, brdfDataClearCoat, 0.0,
-                                              inputData.bakedGI, 1.0, inputData.positionWS,
-                                              inputData.normalWS, inputData.viewDirectionWS, inputData.normalizedScreenSpaceUV);
+                            inputData.bakedGI, 1.0, inputData.positionWS,
+                            inputData.normalWS, inputData.viewDirectionWS, inputData.normalizedScreenSpaceUV);
 
     lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, inputData.normalWS, inputData.viewDirectionWS, specularHighlightsOff);
     
