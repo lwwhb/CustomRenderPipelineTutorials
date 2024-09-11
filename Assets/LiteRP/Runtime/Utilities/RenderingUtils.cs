@@ -10,6 +10,27 @@ namespace LiteRP
         // Caches render texture format support. SystemInfo.SupportsRenderTextureFormat allocates memory due to boxing.
         static Dictionary<RenderTextureFormat, bool> m_RenderTextureFormatSupport = new Dictionary<RenderTextureFormat, bool>();
         
+        static Material s_ErrorMaterial;
+        static Material errorMaterial
+        {
+            get
+            {
+                if (s_ErrorMaterial == null)
+                {
+                    // TODO: When importing project, AssetPreviewUpdater::CreatePreviewForAsset will be called multiple times.
+                    // This might be in a point that some resources required for the pipeline are not finished importing yet.
+                    // Proper fix is to add a fence on asset import.
+                    try
+                    {
+                        s_ErrorMaterial = new Material(Shader.Find("Hidden/LiteRP/FallbackError"));
+                    }
+                    catch { }
+                }
+
+                return s_ErrorMaterial;
+            }
+        }
+        
         internal static void ClearSystemInfoCache()
         {
             m_RenderTextureFormatSupport.Clear();

@@ -12,6 +12,8 @@ namespace LiteRP
         public const string SoftShadowsLow = "_SHADOWS_SOFT_LOW";                       //使用软阴影-低质量
         public const string SoftShadowsMedium = "_SHADOWS_SOFT_MEDIUM";                 //使用软阴影-中质量
         public const string SoftShadowsHigh = "_SHADOWS_SOFT_HIGH";                     //使用软阴影-高质量
+
+        public const string AdditionalLights = "_ADDITIONAL_LIGHTS";                    //使用辅助光源
         
         public const string AlphaTestOn = "_ALPHATEST_ON";                            //AlphaTest开启
         public const string AlphaPreMultiplyOn = "_ALPHAPREMULTIPLY_ON";              //Alpha预乘开启
@@ -36,6 +38,8 @@ namespace LiteRP
         public static GlobalKeyword SoftShadowsMedium;
         public static GlobalKeyword SoftShadowsHigh;
         
+        public static GlobalKeyword AdditionalLights;
+        
         public static GlobalKeyword AlphaTestOn;                            
         public static GlobalKeyword AlphaPreMultiplyOn;              
         public static GlobalKeyword AlphaModulateOn;                    
@@ -56,6 +60,8 @@ namespace LiteRP
             SoftShadowsLow = GlobalKeyword.Create(ShaderKeywordStrings.SoftShadowsLow);
             SoftShadowsMedium = GlobalKeyword.Create(ShaderKeywordStrings.SoftShadowsMedium);
             SoftShadowsHigh = GlobalKeyword.Create(ShaderKeywordStrings.SoftShadowsHigh);
+
+            AdditionalLights = GlobalKeyword.Create(ShaderKeywordStrings.AdditionalLights);
             
             AlphaTestOn = GlobalKeyword.Create(ShaderKeywordStrings.AlphaTestOn);
             AlphaPreMultiplyOn = GlobalKeyword.Create(ShaderKeywordStrings.AlphaPreMultiplyOn);
@@ -70,16 +76,39 @@ namespace LiteRP
 
     internal static class ShaderPropertyName
     {
+        public static readonly string time = "_Time";
+        public static readonly string sinTime = "_SinTime";
+        public static readonly string cosTime = "_CosTime";
+        public static readonly string deltaTime = "unity_DeltaTime";
+        public static readonly string timeParameters = "_TimeParameters";
+        public static readonly string lastTimeParameters = "_LastTimeParameters";
+        
         public static readonly string worldSpaceCameraPosName = "_WorldSpaceCameraPos";
-        
         public static readonly string alphaToMaskAvailableName = "_AlphaToMaskAvailable";
+        //public static readonly string scaledScreenParams = "_ScaledScreenParams";
+        public static readonly string screenParams = "_ScreenParams";
+        public static readonly string projectionParams = "_ProjectionParams";
+        public static readonly string zBufferParams = "_ZBufferParams";
+        public static readonly string orthoParams = "unity_OrthoParams";
+        //public static readonly string globalMipBias = "_GlobalMipBias";
         
-        public static readonly string shadowBiasName = "_ShadowBias";
+        // SetupLightsPass Const Buffer Begin
+        public static readonly string mainLightPositionName = "_MainLightPosition";   
+        public static readonly string mainLightColorName = "_MainLightColor";      
+
+        public static readonly string additionalLightsCountName = "_AdditionalLightsCount";
+        public static readonly string additionalLightsPositionName = "_AdditionalLightsPosition";
+        public static readonly string additionalLightsColorName = "_AdditionalLightsColor";
+        public static readonly string additionalLightsAttenuationName = "_AdditionalLightsAttenuation";
+        public static readonly string additionalLightsSpotDirName = "_AdditionalLightsSpotDir";
+        // SetupLightsPass Const Buffer End
+        
+        // MainLightShadowMapPass Begin
         public static readonly string lightDirectionName = "_LightDirection";
         public static readonly string lightPositionName = "_LightPosition";
         
-        // MainLightShadowMapPass Begin
         public static readonly string mainLightShadowmapName = "_MainLightShadowmapTexture";
+        public static readonly string shadowBiasName = "_ShadowBias";
         
         // MainLightShadowMapPass Const Buffer Begin
         public static readonly string mainLightWorldToShadowName = "_MainLightWorldToShadow";
@@ -97,17 +126,42 @@ namespace LiteRP
         // MainLightShadowMapPass End
     }
     internal static class ShaderPropertyId
-    {
+    {   
+        // time
+        public static readonly int time = Shader.PropertyToID(ShaderPropertyName.time);
+        public static readonly int sinTime = Shader.PropertyToID(ShaderPropertyName.sinTime);
+        public static readonly int cosTime = Shader.PropertyToID(ShaderPropertyName.cosTime);
+        public static readonly int deltaTime = Shader.PropertyToID(ShaderPropertyName.deltaTime);
+        public static readonly int timeParameters = Shader.PropertyToID(ShaderPropertyName.timeParameters);
+        public static readonly int lastTimeParameters = Shader.PropertyToID(ShaderPropertyName.lastTimeParameters);
+        
+        //camera and screen params
         public static readonly int worldSpaceCameraPos = Shader.PropertyToID(ShaderPropertyName.worldSpaceCameraPosName);
-        
         public static readonly int alphaToMaskAvailable = Shader.PropertyToID(ShaderPropertyName.alphaToMaskAvailableName);
+        //public static readonly int scaledScreenParams = Shader.PropertyToID(ShaderPropertyName.scaledScreenParams);
+        public static readonly int screenParams = Shader.PropertyToID(ShaderPropertyName.screenParams);
+        public static readonly int projectionParams = Shader.PropertyToID(ShaderPropertyName.projectionParams);
+        public static readonly int zBufferParams = Shader.PropertyToID(ShaderPropertyName.zBufferParams);
+        public static readonly int orthoParams = Shader.PropertyToID(ShaderPropertyName.orthoParams);
+        //public static readonly int globalMipBias = Shader.PropertyToID(ShaderPropertyName.globalMipBias);
         
-        public static readonly int shadowBias = Shader.PropertyToID(ShaderPropertyName.shadowBiasName);
+        // SetupLightsPass Const Buffer Begin
+        public static readonly int mainLightPosition = Shader.PropertyToID(ShaderPropertyName.mainLightPositionName);
+        public static readonly int mainLightColor = Shader.PropertyToID(ShaderPropertyName.mainLightColorName);
+        public static readonly int additionalLightsCount = Shader.PropertyToID(ShaderPropertyName.additionalLightsCountName);
+        public static readonly int additionalLightsPosition = Shader.PropertyToID(ShaderPropertyName.additionalLightsPositionName);
+        public static readonly int additionalLightsColor = Shader.PropertyToID(ShaderPropertyName.additionalLightsColorName);
+        public static readonly int additionalLightsAttenuation = Shader.PropertyToID(ShaderPropertyName.additionalLightsAttenuationName);
+        public static readonly int additionalLightsSpotDir = Shader.PropertyToID(ShaderPropertyName.additionalLightsSpotDirName);
+        // SetupLightsPass Const Buffer End
+        
+        // MainLightShadowMapPass Begin
+        
         public static readonly int lightDirection = Shader.PropertyToID(ShaderPropertyName.lightDirectionName);
         public static readonly int lightPosition = Shader.PropertyToID(ShaderPropertyName.lightPositionName);
         
-        // MainLightShadowMapPass Begin
         public static readonly int mainLightShadowmap = Shader.PropertyToID(ShaderPropertyName.mainLightShadowmapName);
+        public static readonly int shadowBias = Shader.PropertyToID(ShaderPropertyName.shadowBiasName);
         
         // MainLightShadowMapPass Const Buffer Begin
         public static readonly int mainLightWorldToShadow = Shader.PropertyToID(ShaderPropertyName.mainLightWorldToShadowName);
@@ -123,5 +177,16 @@ namespace LiteRP
         // MainLightShadowMapPass Const Buffer End
         
         // MainLightShadowMapPass MainLightShadowMapPass End
+        
+        // glossy and ambient Begin
+        public static readonly int glossyEnvironmentColor = Shader.PropertyToID("_GlossyEnvironmentColor");
+        //lwwhb
+        //public static readonly int glossyEnvironmentCubeMap = Shader.PropertyToID("_GlossyEnvironmentCubeMap");
+        //public static readonly int glossyEnvironmentCubeMapHDR = Shader.PropertyToID("_GlossyEnvironmentCubeMap_HDR");
+
+        public static readonly int ambientSkyColor = Shader.PropertyToID("unity_AmbientSky");
+        public static readonly int ambientEquatorColor = Shader.PropertyToID("unity_AmbientEquator");
+        public static readonly int ambientGroundColor = Shader.PropertyToID("unity_AmbientGround");
+        // glossy and ambient End
     }
 }

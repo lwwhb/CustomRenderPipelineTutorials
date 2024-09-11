@@ -1,16 +1,18 @@
-Shader "Hidden/LiteRP/FallbackError"
+Shader "Hidden/LiteRenderPipeline/FallbackError"
 {
     SubShader
     {
         Tags
         {
             "RenderType" = "Opaque"
-            "RenderPipeline" = "LiteRP"
+            "RenderPipeline" = "LiteRenderPipeline"
             "IgnoreProjector" = "True"
         }
 
         Pass
         {
+            Name "Error"
+            
             HLSLPROGRAM
             #pragma target 2.0
             #pragma editor_sync_compilation
@@ -19,9 +21,10 @@ Shader "Hidden/LiteRP/FallbackError"
             // Shader Stages
             #pragma vertex vert
             #pragma fragment frag
-
+            
             //--------------------------------------
             // GPU Instancing
+            #pragma multi_compile_instancing
             #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
 
             // -------------------------------------
@@ -55,5 +58,6 @@ Shader "Hidden/LiteRP/FallbackError"
             ENDHLSL
         }
     }
-    Fallback Off
+
+    Fallback "Hidden/Core/FallbackError"
 }

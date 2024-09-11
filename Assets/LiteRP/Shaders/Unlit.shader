@@ -1,4 +1,4 @@
-Shader "LiteRP/Unlit"
+Shader "LiteRenderPipeline/Unlit"
 {
     Properties
     {
@@ -6,7 +6,7 @@ Shader "LiteRP/Unlit"
         [MainTexture] _BaseMap ("Texture", 2D) = "white" {}
         [MainColor] _BaseColor ("Color", Color) = (1,1,1,1)
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,1)
-        [NoScaleOffset]_EmissionMap("Emission Map", 2D) = "white" {}
+        _EmissionMap("Emission Map", 2D) = "white" {}
         _Cutoff("AlphaCutout", Range(0.0, 1.0)) = 0.5
         
         // BlendMode
@@ -31,27 +31,28 @@ Shader "LiteRP/Unlit"
         // Shader 代码
         Tags { 
             "RenderType"="Opaque" 
-            "RenderPipeline" = "LiteRP"
+            "RenderPipeline" = "LiteRenderPipeline"
             "LiteRPMaterialType" = "Unlit"
             "IgnoreProjector" = "True"
         }
         LOD 100
-        
+            
         // Render State Commands
         Blend [_SrcBlend][_DstBlend], [_SrcBlendAlpha][_DstBlendAlpha]
         ZWrite [_ZWrite]
         Cull [_Cull]
-
+        
         Pass
         {
             Name "Unlit"
             
-            // Render State Commands
             AlphaToMask[_AlphaToMask]
             
             HLSLPROGRAM
-
             #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
             #pragma vertex UnlitPassVertex
             #pragma fragment UnlitPassFragment
 
@@ -73,6 +74,7 @@ Shader "LiteRP/Unlit"
             // GPU Instancing
             #pragma multi_compile_instancing
             #include_with_pragmas "../Runtime/ShaderLibrary/DOTS.hlsl"
+            
             // Includes
             #include "../Runtime/ShaderLibrary/UnlitInput.hlsl"
             #include "../Runtime/ShaderLibrary/UnlitForwardPass.hlsl"
@@ -118,6 +120,7 @@ Shader "LiteRP/Unlit"
             ENDHLSL
         }
     }
-    Fallback "Hidden/LiteRP/FallbackError"
+
+    Fallback "Hidden/LiteRenderPipeline/FallbackError"
     CustomEditor "LiteRP.Editor.UnlitShaderGUI"
 }

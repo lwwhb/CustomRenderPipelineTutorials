@@ -21,6 +21,11 @@ namespace LiteRP.FrameData
             postProcessEnabled = false;
         }
 
+        public float GetCameraAspectRatio()
+        {
+            return (float)camera.pixelWidth / (float)camera.pixelHeight;
+        }
+
         public RTClearFlags GetClearFlags()
         {
             CameraClearFlags clearFlags = camera.clearFlags;

@@ -2,13 +2,13 @@ using System;
 using UnityEditor.ShaderGraph;
 using UnityEngine.Rendering;
 
-namespace LiteRP.Editor
+namespace LiteRP.Editor.ShaderGraph
 {
     sealed class LiteRPTarget : Target
     {
         public LiteRPTarget()
         {
-            displayName = "LiteRP";
+            displayName = "LiteRenderPipeline";
         }
 
         public override bool IsActive()

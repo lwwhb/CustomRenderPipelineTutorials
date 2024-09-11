@@ -5,7 +5,6 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 #include "ShaderVariablesInput.hlsl"
 #include "ShaderInputData.hlsl"
-#include "SurfaceFunctions.hlsl"
 
 #define MAX_SHADOW_CASCADES 4
 
@@ -51,7 +50,6 @@ float4 _ShadowBias; // x: depth bias, y: normal bias
 
 #define BEYOND_SHADOW_FAR(shadowCoord) shadowCoord.z <= 0.0 || shadowCoord.z >= 1.0
 
-// Should match: UnityEngine.Rendering.Universal + 1
 #define SOFT_SHADOW_QUALITY_OFF    half(0.0)
 #define SOFT_SHADOW_QUALITY_LOW    half(1.0)
 #define SOFT_SHADOW_QUALITY_MEDIUM half(2.0)

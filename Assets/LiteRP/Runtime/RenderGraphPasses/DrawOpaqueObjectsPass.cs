@@ -17,7 +17,7 @@ namespace LiteRP
             using (var builder = renderGraph.AddRasterRenderPass<DrawOpaqueObjectsPassData>("Draw Opaque Objects Pass", out var passData, s_DrawOpaqueObjectsProfilingSampler))
             {
                 //创建不透明对象渲染列表
-                RendererListDesc opaqueRendererDesc = new RendererListDesc(s_shaderTagId, cameraData.cullingResults, cameraData.camera);
+                RendererListDesc opaqueRendererDesc = new RendererListDesc(s_shaderTagIds, cameraData.cullingResults, cameraData.camera);
                 opaqueRendererDesc.sortingCriteria = SortingCriteria.CommonOpaque;
                 opaqueRendererDesc.renderQueueRange = RenderQueueRange.opaque;
                 passData.opaqueRendererListHandle = renderGraph.CreateRendererList(opaqueRendererDesc);

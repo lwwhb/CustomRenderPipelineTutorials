@@ -8,6 +8,9 @@ using ShaderKeywordFilter = UnityEditor.ShaderKeywordFilter;
 namespace LiteRP
 {
     [CreateAssetMenu(menuName = "Lite Render Pipeline/Lite Render Pipeline Asset")]
+#if UNITY_EDITOR
+    [ShaderKeywordFilter.ApplyRulesIfTagsEqual("RenderPipeline", "LiteRenderPipeline")]
+#endif
     public class LiteRPAsset : RenderPipelineAsset<LiteRenderPipeline>
     {
         // RenderPipelineSettings

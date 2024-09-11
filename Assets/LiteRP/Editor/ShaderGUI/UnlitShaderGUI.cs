@@ -21,24 +21,43 @@ namespace LiteRP.Editor
             material.shaderKeywords = null;
             base.AssignNewShaderToMaterial(material, oldShader, newShader);
 
-            if (oldShader == null)
+            if (oldShader == null || !oldShader.name.Contains("Legacy Shaders/"))
             {
                 LiteRPShaderHelper.SetupMaterialBlendMode(material);
+                return;
+            }
+ 
+            SurfaceType surfaceType = (SurfaceType)material.GetFloat(LiteRPShaderProperty.SurfaceType);
+            BlendMode blendMode = (BlendMode)material.GetFloat(LiteRPShaderProperty.BlendMode);
+            if (oldShader.name.Contains("/Transparent/Cutout/"))
+            {
+                surfaceType = SurfaceType.Opaque;
+                material.SetFloat("_AlphaClip", 1);
+            }
+            else if (oldShader.name.Contains("/Transparent/"))
+            {
+                surfaceType = SurfaceType.Transparent;
+                blendMode = BlendMode.Alpha;
+            }
+            material.SetFloat("_Blend", (float)blendMode);
+            material.SetFloat("_Surface", (float)surfaceType);
+            
+            if (surfaceType == SurfaceType.Opaque)
+            {
+                material.DisableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
             }
             else
             {
-                SurfaceType surfaceType = (SurfaceType)material.GetFloat(LiteRPShaderProperty.SurfaceType);
-                BlendMode blendMode = (BlendMode)material.GetFloat(LiteRPShaderProperty.BlendMode);
-            
-                if (surfaceType == SurfaceType.Opaque)
-                {
-                    material.DisableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
-                }
-                else
-                {
-                    material.EnableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
-                }
+                material.EnableKeyword(ShaderKeywordStrings.SurfaceTypeTransparent);
             }
+        }
+        
+        public override void DrawSurfaceInputs(Material material)
+        {
+            base.DrawSurfaceInputs(material);
+            // 绘制EmissionMap
+            LiteRPShaderGUIHelper.DrawEmissionProperties(m_MaterialEditor, m_EmissionMapProperty, m_EmissionColorProperty, true);
+            LiteRPShaderGUIHelper.DrawTileOffset(m_MaterialEditor, m_BaseMapProperty);
         }
     }
 }

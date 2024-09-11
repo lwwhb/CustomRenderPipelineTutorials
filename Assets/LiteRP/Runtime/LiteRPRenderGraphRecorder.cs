@@ -9,7 +9,11 @@ namespace LiteRP
 {
     public partial class LiteRPRenderGraphRecorder : IRenderGraphRecorder, IDisposable
     {
-        private static readonly ShaderTagId s_shaderTagId = new ShaderTagId("SRPDefaultUnlit"); //渲染标签ID
+        private static readonly ShaderTagId[] s_shaderTagIds = new ShaderTagId[]
+        {
+            new ShaderTagId("SRPDefaultUnlit"),
+            new ShaderTagId("LiteRPForward")
+        }; //渲染标签IDs
         
         private TextureHandle m_BackbufferColorHandle = TextureHandle.nullHandle;
         private RTHandle m_ColorTarget = null;
@@ -27,6 +31,8 @@ namespace LiteRP
             CameraData cameraData = frameData.Get<CameraData>();
             LightData lightData = frameData.Get<LightData>();
             ShadowData shadowData = frameData.Get<ShadowData>();
+            
+            AddSetupLightsPass(renderGraph, cameraData, lightData);
             CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
             AddInitRenderGraphFramePass(renderGraph);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
