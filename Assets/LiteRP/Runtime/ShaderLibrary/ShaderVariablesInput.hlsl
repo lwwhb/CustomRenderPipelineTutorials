@@ -22,10 +22,8 @@ struct InputData
     half3   viewDirectionWS;
     float4  shadowCoord;
     half    fogCoord;
-    half3   vertexLighting;
     half3   bakedGI;
     float2  normalizedScreenSpaceUV;
-    half4   shadowMask;
     half3x3 tangentToWorld;
 };
 

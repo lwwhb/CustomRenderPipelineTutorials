@@ -7,6 +7,35 @@
 
 #define kDielectricSpec half4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
 
+struct BRDFInputData
+{
+    half3 halfDir;
+    half3 reflectDir;
+    half NdotV;
+    half NdotL;
+    half NdotH;
+    half HdotV; // == LdotH
+    
+    #if !defined(_OPTIMIZED_BRDF_OFF)
+    half LdotV;
+    #endif
+};
+
+inline void InitializeBRDFInputData(half3 lightDirectionWS,
+    half3 normalWS, half3 viewDirectionWS, out BRDFInputData outBRDFInputData)
+{
+    outBRDFInputData = (BRDFInputData)0;
+    outBRDFInputData.halfDir = SafeNormalize(lightDirectionWS + viewDirectionWS);
+    outBRDFInputData.reflectDir = reflect(-viewDirectionWS, normalWS);
+    outBRDFInputData.NdotV = saturate(dot(normalWS, viewDirectionWS));
+    outBRDFInputData.NdotL = saturate(dot(normalWS, lightDirectionWS));
+    outBRDFInputData.HdotV = saturate(dot(outBRDFInputData.halfDir, viewDirectionWS));
+    outBRDFInputData.NdotH = saturate(dot(normalWS, outBRDFInputData.halfDir));
+    #if !defined(_OPTIMIZED_BRDF_OFF)
+    outBRDFInputData.LdotV = saturate(dot(lightDirectionWS, viewDirectionWS));
+    #endif
+}
+
 struct BRDFData
 {
     half3 albedo;

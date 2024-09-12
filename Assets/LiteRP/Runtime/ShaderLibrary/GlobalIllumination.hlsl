@@ -89,15 +89,12 @@ half3 GlossyEnvironmentReflection(half3 reflectVector, float3 positionWS, half p
 }
 
 half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float clearCoatMask,
-    half3 bakedGI, half occlusion, float3 positionWS,
-    half3 normalWS, half3 viewDirectionWS)
+    half3 bakedGI, half occlusion, float3 positionWS, BRDFInputData brdfInputData)
 {
-    half3 reflectVector = reflect(-viewDirectionWS, normalWS);
-    half NoV = saturate(dot(normalWS, viewDirectionWS));
-    half fresnelTerm = Pow4(1.0 - NoV);
+    half fresnelTerm = Pow4(1.0 - brdfInputData.NdotV);
 
     half3 indirectDiffuse = bakedGI;
-    half3 indirectSpecular = GlossyEnvironmentReflection(reflectVector, positionWS, brdfData.perceptualRoughness, 1.0h);
+    half3 indirectSpecular = GlossyEnvironmentReflection(brdfInputData.reflectDir, positionWS, brdfData.perceptualRoughness, occlusion);
 
     half3 color = EnvironmentBRDF(brdfData, indirectDiffuse, indirectSpecular, fresnelTerm);
 

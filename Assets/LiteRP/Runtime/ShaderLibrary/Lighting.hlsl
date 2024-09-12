@@ -7,35 +7,25 @@
 //                      Lighting Functions                                   //
 ///////////////////////////////////////////////////////////////////////////////
 half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
-    half3 lightColor, half3 lightDirectionWS, float lightAttenuation,
-    half3 normalWS, half3 viewDirectionWS,
+    half3 lightColor, half3 lightDirectionWS, float lightAttenuation, BRDFInputData brdfInputData,
     half clearCoatMask, bool specularHighlightsOff)
 {
-    half3 halfDir = SafeNormalize(lightDirectionWS + viewDirectionWS);
+    half3 radiance = lightColor * (lightAttenuation * brdfInputData.NdotL);
     
-    half NdotL = saturate(dot(normalWS, lightDirectionWS));
-    half NdotH = saturate(dot(normalWS, halfDir));
-    
-    half3 radiance = lightColor * (lightAttenuation * NdotL);
-    
-    #ifndef _OPTIMIZED_BRDF_OFF
-        half NdotV = saturate(dot(normalWS, viewDirectionWS));
-        half LdotV = saturate(dot(lightDirectionWS, viewDirectionWS));
-        half3 brdf = DirectBRDFDiffuseColor(brdfData, NdotV, NdotL, LdotV);
+    #if !defined(_OPTIMIZED_BRDF_OFF)
+        half3 brdf = DirectBRDFDiffuseColor(brdfData, brdfInputData.NdotV, brdfInputData.NdotL, brdfInputData.LdotV);
     #else
         half3 brdf = brdfData.diffuse;
     #endif
 #ifndef _SPECULARHIGHLIGHTS_OFF
     [branch] if (!specularHighlightsOff)
     {
-        #ifndef _OPTIMIZED_BRDF_OFF
-            half HdotV = saturate(dot(halfDir, viewDirectionWS));
-            brdf += DirectBRDFSpecularColor(brdfData, NdotH, NdotL, NdotV, HdotV);
+        #if !defined(_OPTIMIZED_BRDF_OFF)
+            brdf += DirectBRDFSpecularColor(brdfData, brdfInputData.NdotH, brdfInputData.NdotL, brdfInputData.NdotV, brdfInputData.HdotV);
         #else
             //lwwhb 指令优化，可能有效果差异，注意
             //brdf += brdfData.specular * DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
-            half LdotH = saturate(dot(lightDirectionWS, halfDir));
-            brdf += brdfData.specular * DirectBRDFSpecularOpt(brdfData, NdotH, LdotH);
+            brdf += brdfData.specular * DirectBRDFSpecularOpt(brdfData, brdfInputData.NdotH, brdfInputData.HdotV); //HdotV == LdotH
         #endif
     }
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
@@ -58,26 +48,16 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
     return brdf * radiance;
 }
 
-half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, Light light, half3 normalWS, half3 viewDirectionWS, half clearCoatMask, bool specularHighlightsOff)
+half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, Light light, BRDFInputData brdfInputData, half clearCoatMask, bool specularHighlightsOff)
 {
-    return LightingPhysicallyBased(brdfData, brdfDataClearCoat, light.color, light.direction, light.distanceAttenuation * light.shadowAttenuation, normalWS, viewDirectionWS, clearCoatMask, specularHighlightsOff);
+    return LightingPhysicallyBased(brdfData, brdfDataClearCoat, light.color, light.direction, light.distanceAttenuation * light.shadowAttenuation, brdfInputData, clearCoatMask, specularHighlightsOff);
 }
 
 
-half3 LightingPhysicallyBased(BRDFData brdfData, Light light, half3 normalWS, half3 viewDirectionWS, bool specularHighlightsOff)
+half3 LightingPhysicallyBased(BRDFData brdfData, Light light, BRDFInputData brdfInputData, bool specularHighlightsOff)
 {
     const BRDFData noClearCoat = (BRDFData)0;
-    return LightingPhysicallyBased(brdfData, noClearCoat, light, normalWS, viewDirectionWS, 0.0, specularHighlightsOff);
-}
-
-half3 LightingPhysicallyBased(BRDFData brdfData, half3 lightColor, half3 lightDirectionWS, float lightAttenuation, half3 normalWS, half3 viewDirectionWS, bool specularHighlightsOff)
-{
-    Light light;
-    light.color = lightColor;
-    light.direction = lightDirectionWS;
-    light.distanceAttenuation = lightAttenuation;
-    light.shadowAttenuation   = 1;
-    return LightingPhysicallyBased(brdfData, light, viewDirectionWS, specularHighlightsOff, specularHighlightsOff);
+    return LightingPhysicallyBased(brdfData, noClearCoat, light, brdfInputData, 0.0, specularHighlightsOff);
 }
 
 struct LightingData
@@ -161,20 +141,23 @@ half4 LiteRPFragmentPBR(InputData inputData, LitSurfaceData surfaceData)
     Light mainLight = GetMainLight(inputData);
 
     LightingData lightingData = CreateLightingData(inputData, surfaceData);
+
+    BRDFInputData brdfInputData;
+    InitializeBRDFInputData(mainLight.direction, inputData.normalWS, inputData.viewDirectionWS, brdfInputData);
+    
     // lwwhb  ao临时为1 clearCoatMask为0
     lightingData.giColor = GlobalIllumination(brdfData, brdfDataClearCoat, 0.0,
-                            inputData.bakedGI, 1.0, inputData.positionWS,
-                            inputData.normalWS, inputData.viewDirectionWS );
+                            inputData.bakedGI, 1.0, inputData.positionWS, brdfInputData);
 
-    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, inputData.normalWS, inputData.viewDirectionWS, specularHighlightsOff);
+    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, brdfInputData, specularHighlightsOff);
     
     #if defined(_ADDITIONAL_LIGHTS)
     uint pixelLightCount = GetAdditionalLightsCount();
     LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light light = GetAdditionalLight(lightIndex, inputData, shadowMask, aoFactor);
+        Light light = GetAdditionalLight(lightIndex, aoFactor);
     
     lightingData.additionalLightsColor += LightingPhysicallyBased(brdfData, light,
-        inputData.normalWS, inputData.viewDirectionWS, specularHighlightsOff);
+        brdfInputData, specularHighlightsOff);
     LIGHT_LOOP_END
     #endif
 
