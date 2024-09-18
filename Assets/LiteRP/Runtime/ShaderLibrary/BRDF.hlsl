@@ -201,48 +201,8 @@ half3 EnvironmentBRDFClearCoat(BRDFData brdfData, half clearCoatMask, half3 indi
     float surfaceReduction = 1.0 / (brdfData.roughness2 + 1.0);
     return indirectSpecular * EnvironmentBRDFSpecular(brdfData, fresnelTerm) * clearCoatMask;
 }
-
-// Computes the scalar specular term for Minimalist CookTorrance BRDF
-// NOTE: needs to be multiplied with reflectance f0, i.e. specular color to complete
-half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS)
-{
-    float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
-    float3 halfDir = SafeNormalize(lightDirectionWSFloat3 + float3(viewDirectionWS));
-
-    float NoH = saturate(dot(float3(normalWS), halfDir));
-    half LoH = half(saturate(dot(lightDirectionWSFloat3, halfDir)));
-
-    // GGX Distribution multiplied by combined approximation of Visibility and Fresnel
-    // BRDFspec = (D * V * F) / 4.0
-    // D = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2
-    // V * F = 1.0 / ( LoH^2 * (roughness + 0.5) )
-    // See "Optimizing PBR for Mobile" from Siggraph 2015 moving mobile graphics course
-    // https://community.arm.com/events/1155
-
-    // Final BRDFspec = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2 * (LoH^2 * (roughness + 0.5) * 4.0)
-    // We further optimize a few light invariant terms
-    // brdfData.normalizationTerm = (roughness + 0.5) * 4.0 rewritten as roughness * 4.0 + 2.0 to a fit a MAD.
-    float d = NoH * NoH * brdfData.roughness2MinusOne + 1.00001f;
-
-    half LoH2 = LoH * LoH;
-    half specularTerm = brdfData.roughness2 / ((d * d) * max(0.1h, LoH2) * brdfData.normalizationTerm);
-
-    // On platforms where half actually means something, the denominator has a risk of overflow
-    // clamp below was added specifically to "fix" that, but dx compiler (we convert bytecode to metal/gles)
-    // sees that specularTerm have only non-negative terms, so it skips max(0,..) in clamp (leaving only min(100,...))
-#if REAL_IS_HALF
-    specularTerm = specularTerm - HALF_MIN;
-    // Update: Conservative bump from 100.0 to 1000.0 to better match the full float specular look.
-    // Roughly 65504.0 / 32*2 == 1023.5,
-    // or HALF_MAX / ((mobile) MAX_VISIBLE_LIGHTS * 2),
-    // to reserve half of the per light range for specular and half for diffuse + indirect + emissive.
-    specularTerm = clamp(specularTerm, 0.0, 1000.0); // Prevent FP16 overflow on mobiles
-#endif
-
-    return specularTerm;
-}
-
-half DirectBRDFSpecularOpt(BRDFData brdfData, half NoH, half LoH)
+//与URP比优化了指令
+half DirectBRDFSpecular(BRDFData brdfData, half NoH, half LoH)
 {
     // GGX Distribution multiplied by combined approximation of Visibility and Fresnel
     // BRDFspec = (D * V * F) / 4.0
@@ -311,41 +271,6 @@ half3 DirectBRDFSpecularColor(BRDFData brdfData, half NoH, half NoL, half NoV, h
     half3 specularColor = F * DV;
 
     return specularColor;
-}
-
-// Based on Minimalist CookTorrance BRDF
-// Implementation is slightly different from original derivation: http://www.thetenthplanet.de/archives/255
-//
-// * NDF [Modified] GGX
-// * Modified Kelemen and Szirmay-Kalos for Visibility term
-// * Fresnel approximated with 1/LdotH
-half3 DirectBDRF(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS, bool specularHighlightsOff)
-{
-    // Can still do compile-time optimisation.
-    // If no compile-time optimized, extra overhead if branch taken is around +2.5% on some untethered platforms, -10% if not taken.
-    [branch] if (!specularHighlightsOff)
-    {
-        half specularTerm = DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
-        half3 color = brdfData.diffuse + specularTerm * brdfData.specular;
-        return color;
-    }
-    else
-        return brdfData.diffuse;
-}
-
-// Based on Minimalist CookTorrance BRDF
-// Implementation is slightly different from original derivation: http://www.thetenthplanet.de/archives/255
-//
-// * NDF [Modified] GGX
-// * Modified Kelemen and Szirmay-Kalos for Visibility term
-// * Fresnel approximated with 1/LdotH
-half3 DirectBRDF(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS)
-{
-#ifndef _SPECULARHIGHLIGHTS_OFF
-    return brdfData.diffuse + DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS) * brdfData.specular;
-#else
-    return brdfData.diffuse;
-#endif
 }
 
 #endif

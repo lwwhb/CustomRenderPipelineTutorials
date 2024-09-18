@@ -23,9 +23,7 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
         #if !defined(_OPTIMIZED_BRDF_OFF)
             brdf += DirectBRDFSpecularColor(brdfData, brdfInputData.NdotH, brdfInputData.NdotL, brdfInputData.NdotV, brdfInputData.HdotV);
         #else
-            //lwwhb 指令优化，可能有效果差异，注意
-            //brdf += brdfData.specular * DirectBRDFSpecular(brdfData, normalWS, lightDirectionWS, viewDirectionWS);
-            brdf += brdfData.specular * DirectBRDFSpecularOpt(brdfData, brdfInputData.NdotH, brdfInputData.HdotV); //HdotV == LdotH
+            brdf += brdfData.specular * DirectBRDFSpecular(brdfData, brdfInputData.NdotH, brdfInputData.HdotV); //HdotV == LdotH
         #endif
     }
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
