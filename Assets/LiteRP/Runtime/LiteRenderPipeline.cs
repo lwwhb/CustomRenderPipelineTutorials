@@ -72,6 +72,9 @@ namespace LiteRP
         //新版本
         protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
+            //检查管线全局渲染设置
+            CheckGlobalRenderingSettings();
+            
             //开始渲染上下文
             BeginContextRendering(context, cameras);
             
@@ -109,7 +112,13 @@ namespace LiteRP
             //结束渲染相机
             EndCameraRendering(context, camera);
         }
-        
+
+        private void CheckGlobalRenderingSettings()
+        {
+            GraphicsSettings.lightsUseLinearIntensity = (QualitySettings.activeColorSpace == ColorSpace.Linear);
+            GraphicsSettings.lightsUseColorTemperature = true;
+        }
+
         private void SetupCullingParameters(ref ScriptableCullingParameters cullingParameters, Camera camera)
         {
             float maxShadowDistance = Mathf.Min(m_Asset.mainLightShadowDistance, camera.farClipPlane);
