@@ -7,7 +7,31 @@
 #include "RealtimeLights.hlsl"
 
 #define AMBIENT_PROBE_BUFFER 0
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/AmbientProbe.hlsl"
+
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SphericalHarmonics.hlsl"
+real3 LiteRPEvaluateAmbientProbe(real3 normalWS)
+{
+    #if AMBIENT_PROBE_BUFFER
+    return SampleSH9(_AmbientProbeData, normalWS);
+    #else
+    // Linear + constant polynomial terms
+    real3 res = SHEvalLinearL0L1(normalWS, liteRP_SHAr, liteRP_SHAg, liteRP_SHAb);
+
+    // Quadratic polynomials
+    res += SHEvalLinearL2(normalWS, liteRP_SHBr, liteRP_SHBg, liteRP_SHBb, liteRP_SHC);
+
+    return res;
+    #endif
+}
+
+real3 LiteRPEvaluateAmbientProbeSRGB(real3 normalWS)
+{
+    real3 res = LiteRPEvaluateAmbientProbe(normalWS);
+    #ifdef UNITY_COLORSPACE_GAMMA
+    res = LinearToSRGB(res);
+    #endif
+    return res;
+}
 
 // SH Vertex Evaluation. Depending on target SH sampling might be
 // done completely per vertex or mixed with L2 term per vertex and L0, L1
@@ -40,7 +64,7 @@ half3 SampleSHPixel(half3 L2Term, half3 normalWS)
     #endif
 
     // Default: Evaluate SH fully per-pixel
-    return EvaluateAmbientProbeSRGB(normalWS);
+    return LiteRPEvaluateAmbientProbeSRGB(normalWS);
 }
 
 half3 SampleProbeSHVertex(in float3 absolutePositionWS, in float3 normalWS, in float3 viewDir, out float4 probeOcclusion)

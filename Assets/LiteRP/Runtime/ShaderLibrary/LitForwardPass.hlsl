@@ -4,7 +4,6 @@
 #include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "Shadow.hlsl"
 #include "Lighting.hlsl"
-#include "LitInput.hlsl"
 #include "LitSurfaceData.hlsl"
 #include "SurfaceFunctions.hlsl"
 
@@ -156,7 +155,7 @@ void LitPassFragment(Varyings input, out half4 outColor : SV_Target0)
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
 
-    //InitializeBakedGIData(input, inputData);
+    InitializeBakedGIData(input, inputData);
     
     half4 color = LiteRPFragmentPBR(inputData, surfaceData);
     color.rgb = MixFog(color.rgb, inputData.fogCoord);

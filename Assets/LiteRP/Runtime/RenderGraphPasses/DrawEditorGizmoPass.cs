@@ -16,6 +16,7 @@ namespace LiteRP
 
         private void AddDrawEditorGizmoPass(RenderGraph renderGraph, CameraData cameraData, GizmoSubset gizmoSubset)
         {
+#if UNITY_EDITOR
             if(!Handles.ShouldRenderGizmos() || cameraData.camera.sceneViewFilterMode == Camera.SceneViewFilterMode.ShowFiltered)
                 return;
             
@@ -38,6 +39,7 @@ namespace LiteRP
                     context.cmd.DrawRendererList(data.gizmoRendererListHandle);
                 });
             }
+#endif
         }
     }
 }

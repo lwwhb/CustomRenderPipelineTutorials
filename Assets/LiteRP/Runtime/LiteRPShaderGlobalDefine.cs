@@ -187,6 +187,15 @@ namespace LiteRP
         public static readonly int ambientSkyColor = Shader.PropertyToID("unity_AmbientSky");
         public static readonly int ambientEquatorColor = Shader.PropertyToID("unity_AmbientEquator");
         public static readonly int ambientGroundColor = Shader.PropertyToID("unity_AmbientGround");
+        
+        public static readonly int shAr = Shader.PropertyToID("liteRP_SHAr");
+        public static readonly int shAg = Shader.PropertyToID("liteRP_SHAg");
+        public static readonly int shAb = Shader.PropertyToID("liteRP_SHAb");
+        public static readonly int shBr = Shader.PropertyToID("liteRP_SHBr");
+        public static readonly int shBg = Shader.PropertyToID("liteRP_SHBg");
+        public static readonly int shBb = Shader.PropertyToID("liteRP_SHBb");
+        public static readonly int shC = Shader.PropertyToID("liteRP_SHC");
+        
         // glossy and ambient End
     }
 }

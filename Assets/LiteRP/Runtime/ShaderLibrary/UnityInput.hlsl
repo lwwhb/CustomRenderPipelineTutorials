@@ -1,8 +1,6 @@
 #ifndef LITERP_UNITY_VARIABLES_INPUT_INCLUDED
 #define LITERP_UNITY_VARIABLES_INPUT_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-
 #define UNITY_LIGHTMODEL_AMBIENT (glstate_lightmodel_ambient * 2)
 
 // ----------------------------------------------------------------------------
@@ -90,15 +88,6 @@ CBUFFER_START(UnityPerDraw)
 
     float4 unity_ProbesOcclusion;
 
-    // SH block feature
-    real4 unity_SHAr;
-    real4 unity_SHAg;
-    real4 unity_SHAb;
-    real4 unity_SHBr;
-    real4 unity_SHBg;
-    real4 unity_SHBb;
-    real4 unity_SHC;
-
     // Renderer bounding box.
     float4 unity_RendererBounds_Min;
     float4 unity_RendererBounds_Max;
@@ -135,6 +124,15 @@ real4 unity_AmbientGround;
 real4 unity_IndirectSpecColor;
 float4 unity_FogParams;
 real4  unity_FogColor;
+
+// SH block feature
+real4 liteRP_SHAr;
+real4 liteRP_SHAg;
+real4 liteRP_SHAb;
+real4 liteRP_SHBr;
+real4 liteRP_SHBg;
+real4 liteRP_SHBb;
+real4 liteRP_SHC;
 
 float4x4 glstate_matrix_projection;
 float4x4 unity_MatrixV;
