@@ -72,6 +72,9 @@ namespace LiteRP
         //新版本
         protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
+            //检查管线全局渲染设置
+            CheckGlobalRenderingSettings();
+            
             //开始渲染上下文
             BeginContextRendering(context, cameras);
             
@@ -109,7 +112,13 @@ namespace LiteRP
             //结束渲染相机
             EndCameraRendering(context, camera);
         }
-        
+
+        private void CheckGlobalRenderingSettings()
+        {
+            GraphicsSettings.lightsUseLinearIntensity = (QualitySettings.activeColorSpace == ColorSpace.Linear);
+            GraphicsSettings.lightsUseColorTemperature = true;
+        }
+
         private void SetupCullingParameters(ref ScriptableCullingParameters cullingParameters, Camera camera)
         {
             float maxShadowDistance = Mathf.Min(m_Asset.mainLightShadowDistance, camera.farClipPlane);
@@ -216,10 +225,27 @@ namespace LiteRP
             Color glossyEnvColor = CoreUtils.ConvertLinearToActiveColorSpace(linearGlossyEnvColor);
             cmd.SetGlobalVector(ShaderPropertyId.glossyEnvironmentColor, glossyEnvColor);
             
-            //lwwhb
+            Vector4 unity_SHAr = new Vector4(ambientSH[0, 3], ambientSH[0, 1], ambientSH[0, 2], ambientSH[0, 0] - ambientSH[0, 6]);
+            Vector4 unity_SHAg = new Vector4(ambientSH[1, 3], ambientSH[1, 1], ambientSH[1, 2], ambientSH[1, 0] - ambientSH[1, 6]);
+            Vector4 unity_SHAb = new Vector4(ambientSH[2, 3], ambientSH[2, 1], ambientSH[2, 2], ambientSH[2, 0] - ambientSH[2, 6]);
+            
+            Vector4 unity_SHBr = new Vector4(ambientSH[0, 4], ambientSH[0, 6], ambientSH[0, 5] * 3, ambientSH[0, 7]);
+            Vector4 unity_SHBg = new Vector4(ambientSH[1, 4], ambientSH[1, 6], ambientSH[1, 5] * 3, ambientSH[1, 7]);
+            Vector4 unity_SHBb = new Vector4(ambientSH[2, 4], ambientSH[2, 6], ambientSH[2, 5] * 3, ambientSH[2, 7]);
+            
+            Vector4 unity_SHC = new Vector4(ambientSH[0, 8], ambientSH[2, 8], ambientSH[1, 8], 1);
+            
+            cmd.SetGlobalVector(ShaderPropertyId.shAr, unity_SHAr);
+            cmd.SetGlobalVector(ShaderPropertyId.shAg, unity_SHAg);
+            cmd.SetGlobalVector(ShaderPropertyId.shAb, unity_SHAb);
+            cmd.SetGlobalVector(ShaderPropertyId.shBr, unity_SHBr);
+            cmd.SetGlobalVector(ShaderPropertyId.shBg, unity_SHBg);
+            cmd.SetGlobalVector(ShaderPropertyId.shBb, unity_SHBb);
+            cmd.SetGlobalVector(ShaderPropertyId.shC, unity_SHC);
+            
             // Used as fallback cubemap for reflections
-            //cmd.SetGlobalTexture(ShaderPropertyId.glossyEnvironmentCubeMap, ReflectionProbe.defaultTexture);
-            //cmd.SetGlobalVector(ShaderPropertyId.glossyEnvironmentCubeMapHDR, ReflectionProbe.defaultTextureHDRDecodeValues);
+            cmd.SetGlobalTexture(ShaderPropertyId.glossyEnvironmentCubeMap, ReflectionProbe.defaultTexture);
+            cmd.SetGlobalVector(ShaderPropertyId.glossyEnvironmentCubeMapHDR, ReflectionProbe.defaultTextureHDRDecodeValues);
 
             // Ambient
             cmd.SetGlobalVector(ShaderPropertyId.ambientSkyColor, CoreUtils.ConvertSRGBToActiveColorSpace(RenderSettings.ambientSkyColor));

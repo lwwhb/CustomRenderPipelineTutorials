@@ -125,7 +125,7 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     Light light;
     light.direction = lightDirection;
     light.distanceAttenuation = attenuation;
-    light.shadowAttenuation = 1.0; // This value can later be overridden in GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
+    light.shadowAttenuation = 1.0; // This value can later be overridden in GetAdditionalLight(uint i, float3 positionWS)
     light.color = color;
 
     return light;
@@ -180,19 +180,7 @@ int GetPerObjectLightIndex(uint index)
 #endif
 }
 
-// Fills a light struct given a loop i index. This will convert the i
-// index to a perObjectLightIndex
 Light GetAdditionalLight(uint i, float3 positionWS)
-{
-#if USE_FORWARD_PLUS
-    int lightIndex = i;
-#else
-    int lightIndex = GetPerObjectLightIndex(i);
-#endif
-    return GetAdditionalPerObjectLight(lightIndex, positionWS);
-}
-
-Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
 {
     int lightIndex = GetPerObjectLightIndex(i);
     Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
@@ -203,12 +191,6 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
     half4 occlusionProbeChannels = _AdditionalLightsOcclusionProbes[lightIndex];
 #endif
     light.shadowAttenuation = 1.0;
-    return light;
-}
-
-Light GetAdditionalLight(uint i, InputData inputData, half4 shadowMask)
-{
-    Light light = GetAdditionalLight(i, inputData.positionWS, shadowMask);
     return light;
 }
 

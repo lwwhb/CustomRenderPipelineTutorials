@@ -4,7 +4,6 @@
 #include "SrpCoreShaderLibraryIncludes.hlsl"
 #include "Shadow.hlsl"
 #include "Lighting.hlsl"
-#include "LitInput.hlsl"
 #include "LitSurfaceData.hlsl"
 #include "SurfaceFunctions.hlsl"
 
@@ -43,6 +42,8 @@ struct Varyings
     #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
     half3 viewDirTS                : TEXCOORD7;
     #endif
+
+    half3 vertexSH                 : TEXCOORD8;
     
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -80,6 +81,11 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
     inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactor);
 
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
+}
+
+void InitializeBakedGIData(Varyings input, inout InputData inputData)
+{
+    inputData.bakedGI = SAMPLE_GI(input.vertexSH, inputData.normalWS);
 }
 
 Varyings LitPassVertex(Attributes input)
@@ -123,6 +129,8 @@ Varyings LitPassVertex(Attributes input)
         half3 viewDirTS = GetViewDirectionTangentSpace(tangentWS, output.normalWS, viewDirWS);
         output.viewDirTS = viewDirTS;
     #endif
+
+    OUTPUT_SH4(vertexInput.positionWS, output.normalWS.xyz, GetWorldSpaceNormalizeViewDir(vertexInput.positionWS), output.vertexSH, output.probeOcclusion);
     
     return output;
 }
@@ -146,6 +154,8 @@ void LitPassFragment(Varyings input, out half4 outColor : SV_Target0)
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
+
+    InitializeBakedGIData(input, inputData);
     
     half4 color = LiteRPFragmentPBR(inputData, surfaceData);
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
