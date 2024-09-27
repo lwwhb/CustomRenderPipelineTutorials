@@ -10,6 +10,8 @@ namespace LiteRP
 {
     public class LiteRenderPipeline : RenderPipeline
     {
+        public const string k_ShaderTagName = "LiteRenderPipeline";
+        
         private LiteRPAsset m_Asset;
         private RenderGraph m_RenderGraph = null; //渲染图
         private LiteRPRenderGraphRecorder m_LiteRPRenderGraphRecorder = null; //渲染图记录器

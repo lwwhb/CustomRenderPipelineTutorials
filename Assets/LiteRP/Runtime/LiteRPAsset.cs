@@ -13,6 +13,9 @@ namespace LiteRP
 #endif
     public class LiteRPAsset : RenderPipelineAsset<LiteRenderPipeline>
     {
+        //lwwhb 一定要复写
+        public override string renderPipelineShaderTag => LiteRenderPipeline.k_ShaderTagName;
+        
         // RenderPipelineSettings
         [SerializeField] bool m_UseSRPBatcher = true;
         public bool useSRPBatcher
