@@ -18,12 +18,19 @@ namespace LiteRP.Editor
         protected MaterialProperty m_SpecularGlossMapProperty { get; set; }
         protected MaterialProperty m_SmoothnessProperty { get; set; }
         protected MaterialProperty m_SmoothnessMapChannelProperty { get; set; }
-        protected MaterialProperty m_BumpMapPropProperty { get; set; }
-        protected MaterialProperty m_BumpScalePropProperty { get; set; }
-        protected MaterialProperty m_ParallaxMapPropProperty { get; set; }
-        protected MaterialProperty m_ParallaxScalePropProperty { get; set; }
+        protected MaterialProperty m_BumpMapProperty { get; set; }
+        protected MaterialProperty m_BumpScaleProperty { get; set; }
+        protected MaterialProperty m_ParallaxMapProperty { get; set; }
+        protected MaterialProperty m_ParallaxScaleProperty { get; set; }
         protected MaterialProperty m_OcclusionStrengthProperty { get; set; }
         protected MaterialProperty m_OcclusionMapProperty { get; set; }
+
+
+        public MaterialProperty m_ClearCoatProperty { get; set; }
+        public MaterialProperty m_ClearCoatMapProperty { get; set; }
+        public MaterialProperty m_ClearCoatMaskProperty { get; set; }
+        public MaterialProperty m_ClearCoatSmoothnessProperty { get; set; }
+
         // Advanced Props
         protected MaterialProperty m_HighlightsProperty { get; set; }
         protected MaterialProperty m_ReflectionsProperty { get; set; }
@@ -40,7 +47,7 @@ namespace LiteRP.Editor
             base.FindProperties(properties);
             
             // Surface Option Props
-            m_WorkflowModeProperty = FindProperty(LiteRPShaderProperty.SpecularWorkflowMode, properties, false);
+            m_WorkflowModeProperty = FindProperty(LiteRPShaderProperty.WorkflowMode, properties, false);
             
             // Surface Input Props
             m_MetallicProperty = FindProperty(LiteRPShaderProperty.Metallic, properties);
@@ -49,12 +56,17 @@ namespace LiteRP.Editor
             m_SpecularGlossMapProperty = FindProperty(LiteRPShaderProperty.SpecGlossMap, properties, false);
             m_SmoothnessProperty = FindProperty(LiteRPShaderProperty.Smoothness, properties, false);
             m_SmoothnessMapChannelProperty = FindProperty(LiteRPShaderProperty.SmoothnessTextureChannel, properties, false);
-            m_BumpMapPropProperty = FindProperty(LiteRPShaderProperty.NormalMap, properties, false);
-            m_BumpScalePropProperty = FindProperty(LiteRPShaderProperty.NormalScale, properties, false);
-            m_ParallaxMapPropProperty = FindProperty(LiteRPShaderProperty.ParallaxMap, properties, false);
-            m_ParallaxScalePropProperty = FindProperty(LiteRPShaderProperty.Parallax, properties, false);
+            m_BumpMapProperty = FindProperty(LiteRPShaderProperty.NormalMap, properties, false);
+            m_BumpScaleProperty = FindProperty(LiteRPShaderProperty.NormalScale, properties, false);
+            m_ParallaxMapProperty = FindProperty(LiteRPShaderProperty.ParallaxMap, properties, false);
+            m_ParallaxScaleProperty = FindProperty(LiteRPShaderProperty.Parallax, properties, false);
             m_OcclusionStrengthProperty = FindProperty(LiteRPShaderProperty.OcclusionStrength, properties, false);
             m_OcclusionMapProperty = FindProperty(LiteRPShaderProperty.OcclusionMap, properties, false);
+            
+            m_ClearCoatProperty = FindProperty(LiteRPShaderProperty.ClearCoat, properties, false);
+            m_ClearCoatMapProperty = FindProperty(LiteRPShaderProperty.ClearCoatMap, properties, false);
+            m_ClearCoatMaskProperty = FindProperty(LiteRPShaderProperty.ClearCoatMask, properties, false);
+            m_ClearCoatSmoothnessProperty = FindProperty(LiteRPShaderProperty.ClearCoatSmoothness, properties, false);
             
             // Advanced Props
             m_HighlightsProperty = FindProperty(LiteRPShaderProperty.SpecularHighlights, properties, false);
@@ -80,15 +92,15 @@ namespace LiteRP.Editor
             if (oldShader.name.Contains("/Transparent/Cutout/"))
             {
                 surfaceType = SurfaceType.Opaque;
-                material.SetFloat("_AlphaClip", 1);
+                material.SetFloat(LiteRPShaderProperty.AlphaClip, 1);
             }
             else if (oldShader.name.Contains("/Transparent/"))
             {
                 surfaceType = SurfaceType.Transparent;
                 blendMode = BlendMode.Alpha;
             }
-            material.SetFloat("_Blend", (float)blendMode);
-            material.SetFloat("_Surface", (float)surfaceType);
+            material.SetFloat(LiteRPShaderProperty.BlendMode, (float)blendMode);
+            material.SetFloat(LiteRPShaderProperty.SurfaceType, (float)surfaceType);
             
             if (surfaceType == SurfaceType.Opaque)
             {
@@ -101,15 +113,15 @@ namespace LiteRP.Editor
             
             if (oldShader.name.Equals("Standard (Specular setup)"))
             {
-                material.SetFloat("_WorkflowMode", (float)LitShaderHelper.WorkflowMode.Specular);
-                Texture texture = material.GetTexture("_SpecGlossMap");
+                material.SetFloat(LiteRPShaderProperty.WorkflowMode, (float)LitShaderHelper.WorkflowMode.Specular);
+                Texture texture = material.GetTexture(LiteRPShaderProperty.SpecGlossMap);
                 if (texture != null)
                     material.SetTexture("_MetallicSpecGlossMap", texture);
             }
             else
             {
-                material.SetFloat("_WorkflowMode", (float)LitShaderHelper.WorkflowMode.Metallic);
-                Texture texture = material.GetTexture("_MetallicGlossMap");
+                material.SetFloat(LiteRPShaderProperty.WorkflowMode, (float)LitShaderHelper.WorkflowMode.Metallic);
+                Texture texture = material.GetTexture(LiteRPShaderProperty.MetallicGlossMap);
                 if (texture != null)
                     material.SetTexture("_MetallicSpecGlossMap", texture);
             }
@@ -131,16 +143,18 @@ namespace LiteRP.Editor
                 m_MetallicProperty, m_MetallicGlossMapProperty, 
                 m_SpecularProperty, m_SpecularGlossMapProperty, 
                 m_SmoothnessProperty, m_SmoothnessMapChannelProperty);
-            LiteRPShaderGUIHelper.DrawNormalProperties(m_MaterialEditor, m_BumpMapPropProperty, m_BumpScalePropProperty);
+            LiteRPShaderGUIHelper.DrawNormalProperties(m_MaterialEditor, m_BumpMapProperty, m_BumpScaleProperty);
 
-            if (m_ParallaxMapPropProperty != null && m_ParallaxScalePropProperty != null)
-                LitShaderGUIHelper.DrawHeightProperties(m_MaterialEditor, m_ParallaxMapPropProperty, m_ParallaxScalePropProperty);
+            if (m_ParallaxMapProperty != null && m_ParallaxScaleProperty != null)
+                LitShaderGUIHelper.DrawHeightProperties(m_MaterialEditor, m_ParallaxMapProperty, m_ParallaxScaleProperty);
 
             if (m_OcclusionMapProperty != null && m_OcclusionStrengthProperty != null)
                 LitShaderGUIHelper.DrawOcclusionProperties(m_MaterialEditor, m_OcclusionMapProperty, m_OcclusionStrengthProperty);
-            
-            LiteRPShaderGUIHelper.DrawEmissionProperties(m_MaterialEditor, m_EmissionMapProperty, m_EmissionColorProperty, true);
+            if (m_EmissionMapProperty != null && m_EmissionColorProperty != null)
+                LiteRPShaderGUIHelper.DrawEmissionProperties(m_MaterialEditor, m_EmissionMapProperty, m_EmissionColorProperty, true);
             LiteRPShaderGUIHelper.DrawTileOffset(m_MaterialEditor, m_BaseMapProperty);
+            if(m_ClearCoatProperty != null && m_ClearCoatMapProperty != null && m_ClearCoatMaskProperty != null && m_ClearCoatSmoothnessProperty != null)
+                LitShaderGUIHelper.DrawClearCoatProperties(m_MaterialEditor, m_ClearCoatProperty, m_ClearCoatMapProperty, m_ClearCoatMaskProperty, m_ClearCoatSmoothnessProperty);
         }
         
         public override void DrawAdvancedOptions(Material material)

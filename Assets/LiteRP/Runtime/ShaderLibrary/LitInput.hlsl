@@ -14,6 +14,8 @@ CBUFFER_START(UnityPerMaterial)
     half _BumpScale;
     half _Parallax;
     half _OcclusionStrength;
+    half _ClearCoatMask;
+    half _ClearCoatSmoothness;
     half _Surface;
 CBUFFER_END
 
@@ -21,6 +23,7 @@ TEXTURE2D(_ParallaxMap);        SAMPLER(sampler_ParallaxMap);
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);
 TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
+TEXTURE2D(_ClearCoatMap);       SAMPLER(sampler_ClearCoatMap);
 
 #ifdef _SPECULAR_SETUP
     #define SAMPLE_METALLICSPECULAR(uv) SAMPLE_TEXTURE2D(_SpecGlossMap, sampler_SpecGlossMap, uv)
@@ -39,6 +42,8 @@ UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
     UNITY_DOTS_INSTANCED_PROP(float , _BumpScale)
     UNITY_DOTS_INSTANCED_PROP(float , _Parallax)
     UNITY_DOTS_INSTANCED_PROP(float , _OcclusionStrength)
+    UNITY_DOTS_INSTANCED_PROP(float , _ClearCoatMask)
+    UNITY_DOTS_INSTANCED_PROP(float , _ClearCoatSmoothness)
     UNITY_DOTS_INSTANCED_PROP(float , _Surface)
 UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
 
@@ -51,6 +56,8 @@ static float  unity_DOTS_Sampled_Metallic;
 static float  unity_DOTS_Sampled_BumpScale;
 static float  unity_DOTS_Sampled_Parallax;
 static float  unity_DOTS_Sampled_OcclusionStrength;
+static float  unity_DOTS_Sampled_ClearCoatMask;
+static float  unity_DOTS_Sampled_ClearCoatSmoothness;
 static float  unity_DOTS_Sampled_Surface;
 
 void SetupDOTSLitMaterialPropertyCaches()
@@ -64,6 +71,8 @@ void SetupDOTSLitMaterialPropertyCaches()
     unity_DOTS_Sampled_BumpScale            = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _BumpScale);
     unity_DOTS_Sampled_Parallax             = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _Parallax);
     unity_DOTS_Sampled_OcclusionStrength    = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _OcclusionStrength);
+    unity_DOTS_Sampled_ClearCoatMask        = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _ClearCoatMask);
+    unity_DOTS_Sampled_ClearCoatSmoothness  = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _ClearCoatSmoothness);
     unity_DOTS_Sampled_Surface              = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _Surface);
 }
 
@@ -79,6 +88,8 @@ void SetupDOTSLitMaterialPropertyCaches()
 #define _BumpScale              unity_DOTS_Sampled_BumpScale
 #define _Parallax               unity_DOTS_Sampled_Parallax
 #define _OcclusionStrength      unity_DOTS_Sampled_OcclusionStrength
+#define _ClearCoatMask          unity_DOTS_Sampled_ClearCoatMask
+#define _ClearCoatSmoothness    unity_DOTS_Sampled_ClearCoatSmoothness
 #define _Surface                unity_DOTS_Sampled_Surface
 
 #endif

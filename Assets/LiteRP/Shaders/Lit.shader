@@ -35,6 +35,10 @@ Shader "LiteRenderPipeline/Lit"
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,1)
         _EmissionMap("Emission Map", 2D) = "white" {}
         
+        [ToggleUI] _ClearCoat("Clear Coat", Float) = 0.0
+        _ClearCoatMap("Clear Coat Map", 2D) = "white" {}
+        _ClearCoatMask("Clear Coat Mask", Range(0.0, 1.0)) = 0.0
+        _ClearCoatSmoothness("Clear Coat Smoothness", Range(0.0, 1.0)) = 1.0
         
         // BlendMode
         _Surface("__surface", Float) = 0.0
@@ -95,6 +99,7 @@ Shader "LiteRenderPipeline/Lit"
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
+            #pragma shader_feature_local_fragment _ _CLEARCOAT _CLEARCOATMAP
             #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
             #pragma shader_feature_local_fragment _OPTIMIZED_BRDF_OFF

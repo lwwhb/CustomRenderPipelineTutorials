@@ -123,7 +123,7 @@ half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float cl
     half3 color = EnvironmentBRDF(brdfData, indirectDiffuse, indirectSpecular, fresnelTerm);
 
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
-        half3 coatIndirectSpecular = GlossyEnvironmentReflection(reflectVector, positionWS, brdfDataClearCoat.perceptualRoughness, 1.0h, normalizedScreenSpaceUV);
+        half3 coatIndirectSpecular = GlossyEnvironmentReflection(brdfInputData.reflectDir, positionWS, brdfDataClearCoat.perceptualRoughness, 1.0h);
         // TODO: "grazing term" causes problems on full roughness
         half3 coatColor = EnvironmentBRDFClearCoat(brdfDataClearCoat, clearCoatMask, coatIndirectSpecular, fresnelTerm);
 
@@ -131,7 +131,7 @@ half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float cl
         // Smooth surface & "ambiguous" lighting
         // NOTE: fresnelTerm (above) is pow4 instead of pow5, but should be ok as blend weight.
         half coatFresnel = kDielectricSpec.x + kDielectricSpec.a * fresnelTerm;
-        return (color * (1.0 - coatFresnel * clearCoatMask) + coatColor) * occlusion;
+        return (color * (1.0 - coatFresnel * clearCoatMask) + coatColor) * occlusion; //注意CoatColor没有乘以clearCoatMask是因为在EnvironmentBRDFClearCoat里已经乘了
     #else
         return color * occlusion;
     #endif

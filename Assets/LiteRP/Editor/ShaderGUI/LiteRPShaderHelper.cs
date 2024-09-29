@@ -13,7 +13,6 @@ namespace LiteRP.Editor
 {
     internal static class LiteRPShaderProperty
     {
-        public static readonly string SpecularWorkflowMode = "_WorkflowMode";
         public static readonly string SurfaceType = "_Surface";
         public static readonly string BlendMode = "_Blend";
         public static readonly string AlphaClip = "_AlphaClip";
@@ -33,6 +32,7 @@ namespace LiteRP.Editor
         public static readonly string BaseColor = "_BaseColor";
         
         // for lit shader
+        public static readonly string WorkflowMode = "_WorkflowMode";
         public static readonly string Metallic = "_Metallic";
         public static readonly string MetallicGlossMap = "_MetallicGlossMap";
         public static readonly string SpecColor = "_SpecColor";
@@ -45,6 +45,11 @@ namespace LiteRP.Editor
         public static readonly string Parallax = "_Parallax";
         public static readonly string OcclusionStrength = "_OcclusionStrength";
         public static readonly string OcclusionMap = "_OcclusionMap";
+        
+        public static readonly string ClearCoat = "_ClearCoat";
+        public static readonly string ClearCoatMap = "_ClearCoatMap";
+        public static readonly string ClearCoatMask = "_ClearCoatMask";
+        public static readonly string ClearCoatSmoothness = "_ClearCoatSmoothness";
         
         // for lit Advanced Props
         public static readonly string SpecularHighlights = "_SpecularHighlights";

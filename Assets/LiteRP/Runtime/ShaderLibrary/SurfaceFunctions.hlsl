@@ -55,4 +55,22 @@ half SampleOcclusion(float2 uv)
     #endif
 }
 
+// Returns clear coat parameters
+// .x/.r == mask
+// .y/.g == smoothness
+half2 SampleClearCoat(float2 uv)
+{
+    #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
+    half2 clearCoatMaskSmoothness = half2(_ClearCoatMask, _ClearCoatSmoothness);
+
+    #if defined(_CLEARCOATMAP)
+    clearCoatMaskSmoothness *= SAMPLE_TEXTURE2D(_ClearCoatMap, sampler_ClearCoatMap, uv).rg;
+    #endif
+
+    return clearCoatMaskSmoothness;
+    #else
+    return half2(0.0, 1.0);
+    #endif  // _CLEARCOAT
+}
+
 #endif

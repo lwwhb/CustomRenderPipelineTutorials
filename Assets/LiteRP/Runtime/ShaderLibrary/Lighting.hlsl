@@ -26,18 +26,22 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat,
             brdf += brdfData.specular * DirectBRDFSpecular(brdfData, brdfInputData.NdotH, brdfInputData.HdotV); //HdotV == LdotH
         #endif
     }
+    
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
         // Clear coat evaluates the specular a second timw and has some common terms with the base specular.
         // We rely on the compiler to merge these and compute them only once.
-        half brdfCoat = kDielectricSpec.r * DirectBRDFSpecular(brdfDataClearCoat, normalWS, lightDirectionWS, viewDirectionWS);
+    #if !defined(_OPTIMIZED_BRDF_OFF)
+        half3 brdfCoat = DirectBRDFSpecularColor(brdfDataClearCoat, brdfInputData.NdotH, brdfInputData.NdotL, brdfInputData.NdotV, brdfInputData.HdotV);
+    #else
+        half3 brdfCoat = kDielectricSpec.r * DirectBRDFSpecular(brdfDataClearCoat, brdfInputData.NdotH, brdfInputData.HdotV);
+    #endif
 
         // Mix clear coat and base layer using khronos glTF recommended formula
         // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md
         // Use NoV for direct too instead of LoH as an optimization (NoV is light invariant).
-        half NoV = saturate(dot(normalWS, viewDirectionWS));
         // Use slightly simpler fresnelTerm (Pow4 vs Pow5) as a small optimization.
         // It is matching fresnel used in the GI/Env, so should produce a consistent clear coat blend (env vs. direct)
-        half coatFresnel = kDielectricSpec.x + kDielectricSpec.a * Pow4(1.0 - NoV);
+        half coatFresnel = kDielectricSpec.x + kDielectricSpec.a * Pow4(1.0 - brdfInputData.NdotV);
 
         brdf = brdf * (1.0 - clearCoatMask * coatFresnel) + brdfCoat * clearCoatMask;
     #endif // _CLEARCOAT
@@ -147,7 +151,7 @@ half4 LiteRPFragmentPBR(InputData inputData, LitSurfaceData surfaceData)
     lightingData.giColor = GlobalIllumination(brdfData, brdfDataClearCoat, 0.0,
                             inputData.bakedGI, 1.0, inputData.positionWS, brdfInputData);
 
-    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, mainLight, brdfInputData, specularHighlightsOff);
+    lightingData.mainLightColor = LightingPhysicallyBased(brdfData, brdfDataClearCoat, mainLight, brdfInputData, surfaceData.clearCoatMask, specularHighlightsOff);
     
     #if defined(_ADDITIONAL_LIGHTS)
     uint pixelLightCount = GetAdditionalLightsCount();
