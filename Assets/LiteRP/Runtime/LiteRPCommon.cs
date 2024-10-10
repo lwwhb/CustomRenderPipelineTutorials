@@ -129,4 +129,9 @@ namespace LiteRP
         [InspectorName("Use Pipeline Settings")]
         UsePipelineSettings = 2,
     }
+    
+    internal enum DefaultMaterialType
+    {
+        Default
+    }
 }

@@ -1,5 +1,7 @@
 
 using System;
+using LiteRP.RenderPipelineResources;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -17,6 +19,7 @@ namespace LiteRP
         public override string renderPipelineShaderTag => LiteRenderPipeline.k_ShaderTagName;
         
         // RenderPipelineSettings
+        #region RenderPipelineSettings
         [SerializeField] bool m_UseSRPBatcher = true;
         public bool useSRPBatcher
         {
@@ -65,8 +68,10 @@ namespace LiteRP
                 OnValidate();
             }
         }
+        #endregion
         
         // QulitySettings
+        #region QulitySettings
         [SerializeField] bool m_SupportsHDR = true;
         public bool supportsHDR
         {
@@ -100,8 +105,10 @@ namespace LiteRP
             get => m_NumIterationsEnclosingSphere;
             set => m_NumIterationsEnclosingSphere = value;
         }
+        #endregion
         
         // LightSettings
+        #region LightSettings
         internal const int k_MaxPerObjectLights = 8;
         [SerializeField] int m_AdditionalLightsPerObjectLimit = 4;
         public int maxAdditionalLightsCount
@@ -109,8 +116,10 @@ namespace LiteRP
             get => m_AdditionalLightsPerObjectLimit;
             set => m_AdditionalLightsPerObjectLimit = Math.Max(0, System.Math.Min(value, k_MaxPerObjectLights));
         }
+        #endregion
         
         // ShadowSettings
+        #region ShadowSettings
         [SerializeField] bool m_MainLightShadowEnabled = true;
         public bool mainLightShadowEnabled
         {
@@ -209,9 +218,10 @@ namespace LiteRP
             get => m_SoftShadowQuality;
             set => m_SoftShadowQuality = value;
         }
+        #endregion
         
         // OtherSettings
-        
+        #region OtherSettings
         /// <summary>
         /// Returns the selected update mode for volumes.
         /// </summary>
@@ -228,6 +238,72 @@ namespace LiteRP
             get => m_VolumeProfile;
             set => m_VolumeProfile = value;
         }
+        #endregion
+        
+        // Default Materials
+        #region Materials
+        Material GetMaterial(DefaultMaterialType materialType)
+        {
+#if UNITY_EDITOR
+            if (GraphicsSettings.TryGetRenderPipelineSettings<LiteRPEditorMaterials>(out var defaultMaterials))
+            {
+                return materialType switch
+                {
+                    DefaultMaterialType.Default => defaultMaterials.defaultMaterial,
+                    _ => null
+                };
+            }
+            return null;
+#else
+            return null;
+#endif
+        }
+
+        /// <summary>
+        /// Returns the default Material.
+        /// </summary>
+        /// <returns>Returns the default Material.</returns>
+        public override Material defaultMaterial => GetMaterial(DefaultMaterialType.Default);
+        #endregion
+        
+        
+        // Default Shaders
+        #region Shaders
+#if UNITY_EDITOR
+        private LiteRPEditorShaders defaultShaders =>
+            GraphicsSettings.GetRenderPipelineSettings<LiteRPEditorShaders>();
+#endif
+
+        Shader m_DefaultShader;
+
+        /// <summary>
+        /// Returns the default shader for the specified renderer. When creating new objects in the editor, the materials of those objects will use the selected default shader.
+        /// </summary>
+        /// <returns>Returns the default shader for the specified renderer.</returns>
+        public override Shader defaultShader
+        {
+            get
+            {
+#if UNITY_EDITOR
+                // TODO: When importing project, AssetPreviewUpdater:CreatePreviewForAsset will be called multiple time
+                // which in turns calls this property to get the default shader.
+                // The property should never return null as, when null, it loads the data using AssetDatabase.LoadAssetAtPath.
+                // However it seems there's an issue that LoadAssetAtPath will not load the asset in some cases. so adding the null check
+                // here to fix template tests.
+                if (m_DefaultShader == null)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(ShaderUtils.GetShaderGUID(ShaderPathID.Lit));
+                    m_DefaultShader = AssetDatabase.LoadAssetAtPath<Shader>(path);
+                }
+#endif
+
+                if (m_DefaultShader == null)
+                    m_DefaultShader = Shader.Find(ShaderUtils.GetShaderPath(ShaderPathID.Lit));
+
+                return m_DefaultShader;
+            }
+        }
+        #endregion
         
         protected override RenderPipeline CreatePipeline()
         {
