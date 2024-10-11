@@ -63,7 +63,7 @@ namespace LiteRP.Editor
         
         private readonly MaterialHeaderScopeList m_MaterialScopeList = new MaterialHeaderScopeList(uint.MaxValue & ~(uint)Expandable.Advanced);
         private bool m_FirstTimeApply = true;
-        private const int m_QueueOffsetRange = 50;
+        protected const int m_QueueOffsetRange = 50;
         
         protected MaterialEditor m_MaterialEditor { get; set; }
         protected virtual uint m_MaterialFilter => uint.MaxValue;

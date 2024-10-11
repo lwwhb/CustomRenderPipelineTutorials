@@ -65,6 +65,22 @@ namespace LiteRP.Editor
         // Global Illumination requires some properties to be named specifically:
         public static readonly string EmissionMap = "_EmissionMap";
         public static readonly string EmissionColor = "_EmissionColor";
+        
+        // for Particles shaders
+        public static readonly string ColorMode = "_ColorMode";
+        public static readonly string FlipbookMode = "_FlipbookBlending";
+        public static readonly string SoftParticlesEnabled = "_SoftParticlesEnabled";
+        public static readonly string CameraFadingEnabled = "_CameraFadingEnabled";
+        public static readonly string DistortionEnabled = "_DistortionEnabled";
+        public static readonly string SoftParticlesNearFadeDistance = "_SoftParticlesNearFadeDistance";
+        public static readonly string SoftParticlesFarFadeDistance = "_SoftParticlesFarFadeDistance";
+        public static readonly string SoftParticleFadeParams = "_SoftParticleFadeParams";
+        public static readonly string CameraNearFadeDistance = "_CameraNearFadeDistance";
+        public static readonly string CameraFarFadeDistance = "_CameraFarFadeDistance";
+        public static readonly string CameraFadeParams = "_CameraFadeParams";
+        public static readonly string DistortionBlend = "_DistortionBlend";
+        public static readonly string DistortionStrengthScaled = "_DistortionStrengthScaled";
+        public static readonly string DistortionStrength = "_DistortionStrength";
     }
     internal static class LiteRPShaderHelper
     {
