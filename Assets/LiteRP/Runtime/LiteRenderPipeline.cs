@@ -25,6 +25,8 @@ namespace LiteRP
         public LiteRenderPipeline(LiteRPAsset asset)
         {
             m_Asset = asset;
+            // 初始化引擎渲染功能
+            InitSupportedRenderingFeatures(asset);
             // 初始化管线属性
             InitializeRPSettings();
             // 初始化RTHandle System
@@ -38,6 +40,7 @@ namespace LiteRP
         protected override void Dispose(bool disposing)
         {
             CleanupRenderGraph();
+            ResetSupportedRenderingFeatures();
             base.Dispose(disposing);
         }
         //初始化Settings
@@ -268,6 +271,53 @@ namespace LiteRP
             //开启录制时间线
             m_LiteRPRenderGraphRecorder.RecordRenderGraph(m_RenderGraph, m_ContextContainer);
             m_RenderGraph.EndRecordingAndExecute();
+        }
+        
+        static void InitSupportedRenderingFeatures(LiteRPAsset pipelineAsset)
+        {
+#if UNITY_EDITOR
+            SupportedRenderingFeatures.active = new SupportedRenderingFeatures()
+            {
+                ambientProbeBaking = true,
+                defaultMixedLightingModes = SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive,
+                defaultReflectionProbeBaking = true,
+                editableMaterialRenderQueue = true,
+                enlighten = true,
+                lightmapBakeTypes = LightmapBakeType.Baked | LightmapBakeType.Mixed | LightmapBakeType.Realtime,
+                lightmapsModes = LightmapsMode.CombinedDirectional | LightmapsMode.NonDirectional,
+                lightProbeProxyVolumes = false,
+                mixedLightingModes = SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive | SupportedRenderingFeatures.LightmapMixedBakeModes.IndirectOnly | SupportedRenderingFeatures.LightmapMixedBakeModes.Shadowmask,
+                motionVectors = false,
+                overridesEnableLODCrossFade = true,
+                overridesEnvironmentLighting = false,
+                overridesFog = false,
+                overridesLightProbeSystem = false,
+                overridesLODBias = false,
+                overridesMaximumLODLevel = false,
+                overridesOtherLightingSettings = false,
+                overridesRealtimeReflectionProbes = false,
+                overridesShadowmask = false,
+                particleSystemInstancing = true,
+                receiveShadows = false,
+                reflectionProbeModes = SupportedRenderingFeatures.ReflectionProbeModes.None,
+                reflectionProbes = false,
+                reflectionProbesBlendDistance = false,
+                rendererPriority = false,
+                rendererProbes = true,
+                rendersUIOverlay = false,
+                skyOcclusion = false,
+                supportsClouds = false,
+                supportsHDR = false
+            };
+#endif
+
+            SupportedRenderingFeatures.active.supportsHDR = pipelineAsset.supportsHDR;
+            SupportedRenderingFeatures.active.rendersUIOverlay = false;
+        }
+
+        static void ResetSupportedRenderingFeatures()
+        {
+            SupportedRenderingFeatures.active = new SupportedRenderingFeatures();
         }
     }
 }
