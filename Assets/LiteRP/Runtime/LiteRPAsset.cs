@@ -317,6 +317,17 @@ namespace LiteRP
         }
         #endregion
         
+        /// <summary>
+        /// Ensures Global Settings are ready and registered into GraphicsSettings
+        /// </summary>
+        protected override void EnsureGlobalSettings()
+        {
+            base.EnsureGlobalSettings();
+#if UNITY_EDITOR
+            LiteRPGlobalSettings.Ensure();
+#endif
+        }
+        
         protected override RenderPipeline CreatePipeline()
         {
             return new LiteRenderPipeline(this);

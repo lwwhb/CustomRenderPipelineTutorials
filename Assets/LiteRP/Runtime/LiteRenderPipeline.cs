@@ -12,7 +12,8 @@ namespace LiteRP
     {
         public const string k_ShaderTagName = "LiteRenderPipeline";
         
-        private LiteRPAsset m_Asset;
+        private LiteRPAsset m_Asset = null;
+        private LiteRPGlobalSettings m_GlobalSettings = null;  //管线全局设置
         private RenderGraph m_RenderGraph = null; //渲染图
         private LiteRPRenderGraphRecorder m_LiteRPRenderGraphRecorder = null; //渲染图记录器
         private ContextContainer m_ContextContainer = null; //上下文容器
@@ -21,10 +22,13 @@ namespace LiteRP
         {
             get => GraphicsSettings.currentRenderPipeline as LiteRPAsset;
         }
+        public override RenderPipelineGlobalSettings defaultSettings => m_GlobalSettings;
 
         public LiteRenderPipeline(LiteRPAsset asset)
         {
             m_Asset = asset;
+            // 设置管线的全局设置
+            m_GlobalSettings = LiteRPGlobalSettings.instance;
             // 初始化引擎渲染功能
             InitSupportedRenderingFeatures(asset);
             // 初始化管线属性
@@ -35,7 +39,6 @@ namespace LiteRP
             ShaderGlobalKeywords.InitializeShaderGlobalKeywords();
             // 初始化RenderGraph
             InitializeRenderGraph();
-            
         }
         protected override void Dispose(bool disposing)
         {

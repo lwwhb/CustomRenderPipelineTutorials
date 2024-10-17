@@ -13,7 +13,7 @@ namespace LiteRP.RenderPipelineResources
     {
         public int version => 0;
         [SerializeField]
-        [ResourcePath("Materials/Lit.mat")]
+        [ResourcePath("LiteRP/Materials/Lit.mat")]
         private Material m_DefaultMaterial;
         public virtual Material defaultMaterial
         {
@@ -22,7 +22,7 @@ namespace LiteRP.RenderPipelineResources
         }
         
         [SerializeField]
-        [ResourcePath("Materials/ParticlesUnlit.mat")]
+        [ResourcePath("LiteRP/Materials/ParticlesUnlit.mat")]
         private Material m_DefaultParticleMaterial;
 
         public virtual Material defaultParticleUnlitMaterial
@@ -32,7 +32,7 @@ namespace LiteRP.RenderPipelineResources
         }
 
         [SerializeField]
-        [ResourcePath("Materials/ParticlesUnlit.mat")]
+        [ResourcePath("LiteRP/Materials/ParticlesUnlit.mat")]
         private Material m_DefaultLineMaterial;
 
         public virtual Material defaultLineMaterial
