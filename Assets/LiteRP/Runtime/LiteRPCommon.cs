@@ -132,6 +132,7 @@ namespace LiteRP
     
     internal enum DefaultMaterialType
     {
-        Default
+        Default,
+        Particle
     }
 }

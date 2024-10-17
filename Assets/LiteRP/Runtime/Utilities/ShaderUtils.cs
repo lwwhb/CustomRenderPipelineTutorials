@@ -7,13 +7,15 @@ namespace LiteRP
     {
         Unlit,
         Lit,
+        ParticlesUnlit
     }
     public static class ShaderUtils
     {
         static readonly string[] s_ShaderPaths =
         {
-            "LiteRP/Unlit",
-            "LiteRP/Lit",
+            "LiteRenderPipeline/Unlit",
+            "LiteRenderPipeline/Lit",
+            "LiteRenderPipeline/ParticlesUnlit",
         };
         
         public static string GetShaderPath(ShaderPathID id)
@@ -67,6 +69,7 @@ namespace LiteRP
         {
             "a9316d8cae61a45d6bf26d5d6216b3c4",
             "33584a15c90854d78b2b83b6df0ee27d",
+            "31f500cd09a64ceb9ec3b7ff041dc695",
         };
 
         /// <summary>

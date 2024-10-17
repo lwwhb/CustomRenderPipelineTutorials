@@ -14,6 +14,7 @@ namespace LiteRP.Editor
 
             Unlit = ShaderPathID.Unlit,
             Lit = ShaderPathID.Lit,
+            ParticlesUnlit = ShaderPathID.ParticlesUnlit,
 
 
             // ShaderGraph IDs start at 1000, correspond to subtargets
@@ -87,6 +88,9 @@ namespace LiteRP.Editor
                     break;
                 case ShaderID.Lit:
                     LiteRPShaderHelper.SetMaterialKeywords(material, LitShaderHelper.SetMaterialKeywords);
+                    break;
+                case ShaderID.ParticlesUnlit:
+                    LiteRPShaderHelper.SetMaterialKeywords(material, ParticlesShaderHelper.SetMaterialKeywords);
                     break;
                 case ShaderID.SG_Unlit:
                     break;

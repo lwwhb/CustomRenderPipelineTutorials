@@ -250,6 +250,7 @@ namespace LiteRP
                 return materialType switch
                 {
                     DefaultMaterialType.Default => defaultMaterials.defaultMaterial,
+                    DefaultMaterialType.Particle => defaultMaterials.defaultParticleUnlitMaterial,
                     _ => null
                 };
             }
@@ -264,6 +265,17 @@ namespace LiteRP
         /// </summary>
         /// <returns>Returns the default Material.</returns>
         public override Material defaultMaterial => GetMaterial(DefaultMaterialType.Default);
+        /// <summary>
+        /// Returns the default particle Material.
+        /// </summary>
+        /// <returns>Returns the default particle Material.</returns>
+        public override Material defaultParticleMaterial => GetMaterial(DefaultMaterialType.Particle);
+
+        /// <summary>
+        /// Returns the default line Material.
+        /// </summary>
+        /// <returns>Returns the default line Material.</returns>
+        public override Material defaultLineMaterial => GetMaterial(DefaultMaterialType.Particle);
         #endregion
         
         

@@ -20,6 +20,26 @@ namespace LiteRP.RenderPipelineResources
             get => m_DefaultMaterial;
             set => this.SetValueAndNotify(ref m_DefaultMaterial, value);
         }
+        
+        [SerializeField]
+        [ResourcePath("Materials/ParticlesUnlit.mat")]
+        private Material m_DefaultParticleMaterial;
+
+        public virtual Material defaultParticleUnlitMaterial
+        {
+            get => m_DefaultParticleMaterial;
+            set => this.SetValueAndNotify(ref m_DefaultParticleMaterial, value);
+        }
+
+        [SerializeField]
+        [ResourcePath("Materials/ParticlesUnlit.mat")]
+        private Material m_DefaultLineMaterial;
+
+        public virtual Material defaultLineMaterial
+        {
+            get => m_DefaultLineMaterial;
+            set => this.SetValueAndNotify(ref m_DefaultLineMaterial, value);
+        }
     }
 }
 #endif
