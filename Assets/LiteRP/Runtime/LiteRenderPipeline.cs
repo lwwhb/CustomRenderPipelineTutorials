@@ -70,12 +70,6 @@ namespace LiteRP
             m_RenderGraph?.Cleanup();
             m_RenderGraph = null;
         }
-
-        //老版本
-        /*protected override void Render(ScriptableRenderContext context, Camera[] cameras)
-        {
-            //不实现
-        }*/
         
         //新版本
         protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
