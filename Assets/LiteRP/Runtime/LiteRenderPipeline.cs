@@ -72,10 +72,10 @@ namespace LiteRP
         }
 
         //老版本
-        protected override void Render(ScriptableRenderContext context, Camera[] cameras)
+        /*protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
             //不实现
-        }
+        }*/
         
         //新版本
         protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
