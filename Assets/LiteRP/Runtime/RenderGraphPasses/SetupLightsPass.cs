@@ -91,6 +91,12 @@ namespace LiteRP
         {
             var lights = lightData.visibleLights;
             int maxAdditionalLightsCount = LightUtils.maxVisibleAdditionalLights;
+            
+            m_AdditionalLightPositions = new Vector4[maxAdditionalLightsCount];
+            m_AdditionalLightColors = new Vector4[maxAdditionalLightsCount];
+            m_AdditionalLightAttenuations = new Vector4[maxAdditionalLightsCount];
+            m_AdditionalLightSpotDirections = new Vector4[maxAdditionalLightsCount];
+            
             int additionalLightsCount = SetupPerObjectLightIndices(cullResults, lightData);
             if (additionalLightsCount > 0)
             {
