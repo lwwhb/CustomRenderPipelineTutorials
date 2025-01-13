@@ -12,7 +12,7 @@ namespace LiteRP
         {
             internal RendererListHandle opaqueRendererListHandle;
         }
-        private void AddDrawOpaqueObjectsPass(RenderGraph renderGraph, CameraData cameraData)
+        private void AddDrawOpaqueObjectsPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData)
         {
             using (var builder = renderGraph.AddRasterRenderPass<DrawOpaqueObjectsPassData>("Draw Opaque Objects Pass", out var passData, s_DrawOpaqueObjectsProfilingSampler))
             {
@@ -24,14 +24,14 @@ namespace LiteRP
                 //RenderGraph引用不透明渲染列表
                 builder.UseRendererList(passData.opaqueRendererListHandle);
 
-                if (m_BackbufferColorHandle.IsValid())
-                    builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
-                if (m_BackbufferDepthHandle.IsValid())
-                    builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Write);
+                if (renderTargetData.backBufferColor.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
+                if (renderTargetData.backBufferDepth.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Write);
                 
                 //设置主光源阴影
-                if (m_MainLightShadowHandle.IsValid())
-                    builder.UseTexture(m_MainLightShadowHandle, AccessFlags.Read);
+                if (renderTargetData.mainLightShadow.IsValid())
+                    builder.UseTexture(renderTargetData.mainLightShadow, AccessFlags.Read);
 
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);

@@ -12,7 +12,7 @@ namespace LiteRP
         {
             internal RendererListHandle skyboxRenderListHandle;
         }
-        private void AddDrawSkyBoxPass(RenderGraph renderGraph, CameraData cameraData)
+        private void AddDrawSkyBoxPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData)
         {
             using (var builder =
                    renderGraph.AddRasterRenderPass<SkyBoxPassData>("Draw SkyBox Pass", out var passData,
@@ -21,10 +21,10 @@ namespace LiteRP
                 passData.skyboxRenderListHandle = renderGraph.CreateSkyboxRendererList(cameraData.camera);
                 builder.UseRendererList(passData.skyboxRenderListHandle);
                 
-                if(m_BackbufferColorHandle.IsValid())
-                    builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
-                if (m_BackbufferDepthHandle.IsValid())
-                    builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Write);
+                if(renderTargetData.backBufferColor.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
+                if (renderTargetData.backBufferDepth.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Write);
                 
                 builder.AllowPassCulling(false);
                 

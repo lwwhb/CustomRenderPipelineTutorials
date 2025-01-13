@@ -14,7 +14,7 @@ namespace LiteRP
             internal Color clearColor;
         }
         
-        private void AddClearRenderTargetPass(RenderGraph renderGraph, CameraData cameraData)
+        private void AddClearRenderTargetPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData)
         {
             using (var builder = renderGraph.AddRasterRenderPass<ClearRenderTargetPassData>("Clear Render Target Pass",
                        out var passData, s_ClearRenderTargetProfilingSampler))
@@ -22,10 +22,10 @@ namespace LiteRP
                 passData.clearFlags = cameraData.GetClearFlags();
                 passData.clearColor = cameraData.GetClearColor();
                
-                if(m_BackbufferColorHandle.IsValid())
-                    builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
-                if (m_BackbufferDepthHandle.IsValid())
-                    builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Write);
+                if(renderTargetData.backBufferColor.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
+                if (renderTargetData.backBufferDepth.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Write);
                 
                 builder.AllowPassCulling(false);
                 

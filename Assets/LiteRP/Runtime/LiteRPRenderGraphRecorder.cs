@@ -15,10 +15,9 @@ namespace LiteRP
             new ShaderTagId("LiteRPForward")
         }; //渲染标签IDs
         
-        private TextureHandle m_BackbufferColorHandle = TextureHandle.nullHandle;
+        private const string k_BackBufferColorTextureName = "_BackBufferColor";
+        private const string k_BackBufferDepthTextureName = "_BackBufferDepth";
         private RTHandle m_ColorTarget = null;
-        
-        private TextureHandle m_BackbufferDepthHandle = TextureHandle.nullHandle;
         private RTHandle m_DepthTarget = null;
 
         internal LiteRPRenderGraphRecorder()
@@ -28,40 +27,43 @@ namespace LiteRP
 
         public void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
+            RenderTargetData renderTargetData = frameData.Get<RenderTargetData>();
             CameraData cameraData = frameData.Get<CameraData>();
             LightData lightData = frameData.Get<LightData>();
             ShadowData shadowData = frameData.Get<ShadowData>();
+            renderTargetData.InitFrame();
             
             AddSetupLightsPass(renderGraph, cameraData, lightData);
-            CreateRenderGraphCameraRenderTargets(renderGraph, cameraData);
+            CreateRenderGraphCameraRenderTargets(renderGraph, renderTargetData, cameraData);
             AddInitRenderGraphFramePass(renderGraph);
             AddSetupCameraPropertiesPass(renderGraph, cameraData);
 
             if (NeedMainLightShadowMapPass(cameraData, lightData, shadowData))
             {
-                AddDrawMainLightShadowMapPass(renderGraph, cameraData, lightData, shadowData);
+                AddDrawMainLightShadowMapPass(renderGraph, renderTargetData, cameraData, lightData, shadowData);
                 AddSetupCameraPropertiesPass(renderGraph, cameraData);
             }
 
             CameraClearFlags clearFlags = cameraData.camera.clearFlags;
             if(!renderGraph.nativeRenderPassesEnabled && clearFlags != CameraClearFlags.Nothing)
             {
-                AddClearRenderTargetPass(renderGraph, cameraData);
+                AddClearRenderTargetPass(renderGraph, renderTargetData, cameraData);
             }
-            AddDrawOpaqueObjectsPass(renderGraph, cameraData);
+            AddDrawOpaqueObjectsPass(renderGraph, renderTargetData, cameraData);
             if(clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
             {
-                AddDrawSkyBoxPass(renderGraph, cameraData);
+                AddDrawSkyBoxPass(renderGraph, renderTargetData,cameraData);
             }
-            AddDrawTransparentObjectsPass(renderGraph, cameraData);
+            AddDrawTransparentObjectsPass(renderGraph, renderTargetData, cameraData);
             
 #if UNITY_EDITOR
-            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PreImageEffects);
-            AddDrawEditorGizmoPass(renderGraph, cameraData, GizmoSubset.PostImageEffects);
+            AddDrawEditorGizmoPass(renderGraph, renderTargetData, cameraData, GizmoSubset.PreImageEffects);
+            AddDrawEditorGizmoPass(renderGraph, renderTargetData, cameraData, GizmoSubset.PostImageEffects);
 #endif
+            renderTargetData.EndFrame();
         }
 
-        private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, CameraData cameraData)
+        private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData)
         {
             var targetTexture = cameraData.camera.targetTexture;
             var cameraTargetTexture = targetTexture;
@@ -72,7 +74,7 @@ namespace LiteRP
                 ? BuiltinRenderTextureType.CameraTarget
                 : new RenderTargetIdentifier(cameraTargetTexture);
             if(m_ColorTarget == null)
-                m_ColorTarget = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, "BackBuffer color");
+                m_ColorTarget = RTHandles.Alloc((RenderTargetIdentifier)targetColorId, k_BackBufferColorTextureName);
             else if(m_ColorTarget.nameID != targetColorId)
                 RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_ColorTarget, targetColorId);
 
@@ -80,7 +82,7 @@ namespace LiteRP
                 ? BuiltinRenderTextureType.Depth
                 : new RenderTargetIdentifier(cameraTargetTexture);
             if(m_DepthTarget == null)
-                m_DepthTarget = RTHandles.Alloc((RenderTargetIdentifier)targetDepthId, "BackBuffer depth");
+                m_DepthTarget = RTHandles.Alloc((RenderTargetIdentifier)targetDepthId, k_BackBufferDepthTextureName);
             else if(m_DepthTarget.nameID != targetDepthId)
                 RTHandleStaticHelpers.SetRTHandleUserManagedWrapper(ref m_DepthTarget, targetDepthId);
             
@@ -134,8 +136,8 @@ namespace LiteRP
                 importInfoDepth.format = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
             }
             
-            m_BackbufferColorHandle = renderGraph.ImportTexture(m_ColorTarget, importInfoColor, importBackbufferColorParams);
-            m_BackbufferDepthHandle = renderGraph.ImportTexture(m_DepthTarget, importInfoDepth, importBackbufferDepthParams);
+            renderTargetData.backBufferColor = renderGraph.ImportTexture(m_ColorTarget, importInfoColor, importBackbufferColorParams);
+            renderTargetData.backBufferDepth = renderGraph.ImportTexture(m_DepthTarget, importInfoDepth, importBackbufferDepthParams);
         }
         
         

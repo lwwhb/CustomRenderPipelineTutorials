@@ -14,7 +14,7 @@ namespace LiteRP
             internal RendererListHandle gizmoRendererListHandle;
         }
 
-        private void AddDrawEditorGizmoPass(RenderGraph renderGraph, CameraData cameraData, GizmoSubset gizmoSubset)
+        private void AddDrawEditorGizmoPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData, GizmoSubset gizmoSubset)
         {
 #if UNITY_EDITOR
             if(!Handles.ShouldRenderGizmos() || cameraData.camera.sceneViewFilterMode == Camera.SceneViewFilterMode.ShowFiltered)
@@ -25,10 +25,10 @@ namespace LiteRP
             using (var builder = renderGraph.AddRasterRenderPass<DrawEditorGizmoPassData>(passName, out var passData,
                        s_DrawEditorGizmoProfilingSampler))
             {
-                if (m_BackbufferColorHandle.IsValid())
-                    builder.SetRenderAttachment(m_BackbufferColorHandle, 0, AccessFlags.Write);
-                if (m_BackbufferDepthHandle.IsValid())
-                    builder.SetRenderAttachmentDepth(m_BackbufferDepthHandle, AccessFlags.Read);
+                if (renderTargetData.backBufferColor.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
+                if (renderTargetData.backBufferDepth.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Read);
 
                 passData.gizmoRendererListHandle = renderGraph.CreateGizmoRendererList(cameraData.camera, gizmoSubset);
                 builder.UseRendererList(passData.gizmoRendererListHandle);

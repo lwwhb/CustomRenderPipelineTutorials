@@ -8,13 +8,10 @@ namespace LiteRP
     public partial class LiteRPRenderGraphRecorder
     {
         private static readonly ProfilingSampler s_DrawMainLightShadowMapProfilingSampler = new ProfilingSampler("DrawMainLightShadowMapPass");
-        private const string k_MainLightShadowmapTextureName = "_MainLightShadowmapTexture";
+        private const string k_MainLightShadowmapTextureName = "_MainLightShadowmap";
+        private RTHandle m_MainLightShadowmapTexture = null;
         private const int k_MaxCascades = 4;
         private const int k_ShadowmapBufferBits = 16;
-        
-        
-        private TextureHandle m_MainLightShadowHandle = TextureHandle.nullHandle;
-        private RTHandle m_MainLightShadowmapTexture = null;
         
         Matrix4x4[] m_MainLightShadowMatrices;
         ShadowSliceData[] m_CascadeSlices;
@@ -101,7 +98,7 @@ namespace LiteRP
             m_MainLightShadowmapTexture?.Release();
         }
         
-        private void AddDrawMainLightShadowMapPass(RenderGraph renderGraph, CameraData cameraData, LightData lightData, ShadowData shadowData)
+        private void AddDrawMainLightShadowMapPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData, LightData lightData, ShadowData shadowData)
         {
             using (var builder = renderGraph.AddRasterRenderPass<DrawMainLightShadowMapPassData>("Draw Main Light ShadowMap Pass", out var passData,
                        s_DrawMainLightShadowMapProfilingSampler))
@@ -120,16 +117,17 @@ namespace LiteRP
                     builder.UseRendererList(passData.shadowRendererListsHandle[cascadeIndex]);
                 }
                 
-                m_MainLightShadowHandle = LiteRPRenderGraphUtils.CreateRenderGraphTexture(renderGraph,
+                renderTargetData.mainLightShadow = LiteRPRenderGraphUtils.CreateRenderGraphTexture(renderGraph,
                     m_MainLightShadowmapTexture.rt.descriptor, k_MainLightShadowmapTextureName, true,
                     ShadowUtils.m_ForceShadowPointSampling ? FilterMode.Point : FilterMode.Bilinear);
-                builder.SetRenderAttachmentDepth(m_MainLightShadowHandle, AccessFlags.Write);
+                if (renderTargetData.mainLightShadow.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.mainLightShadow, AccessFlags.Write);
                 
                 builder.AllowPassCulling(false);
                 builder.AllowGlobalStateModification(true);
 
-                if (m_MainLightShadowHandle.IsValid())
-                    builder.SetGlobalTextureAfterPass(m_MainLightShadowHandle, ShaderPropertyId.mainLightShadowmap);
+                if (renderTargetData.mainLightShadow.IsValid())
+                    builder.SetGlobalTextureAfterPass(renderTargetData.mainLightShadow, ShaderPropertyId.mainLightShadowmap);
                 
                 builder.SetRenderFunc((DrawMainLightShadowMapPassData data, RasterGraphContext context) =>
                 {
