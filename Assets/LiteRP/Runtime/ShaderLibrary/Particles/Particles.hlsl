@@ -2,6 +2,7 @@
 #define LITERP_PARTICLES_INCLUDED
 
 #include "../ShaderVariablesFunctions.hlsl"
+#include "../DeclareDepthTexture.hlsl"
 #include "ParticlesInput.hlsl"
 #include "ParticlesInstancing.hlsl"
 
@@ -79,14 +80,14 @@ half4 MixParticleColor(half4 baseColor, half4 particleColor, half4 colorAddSubDi
 }
 //lwwhb 临时屏蔽，加了场景深度再说
 // Soft particles - returns alpha value for fading particles based on the depth to the background pixel
-/*float SoftParticles(float near, float far, float4 projection)
+float SoftParticles(float near, float far, float4 projection)
 {
     float fade = 1;
     if (near > 0.0 || far > 0.0)
     {
         float2 uv = projection.xy / projection.w;
 
-        float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_PointClamp, uv).r;
+        float rawDepth = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_PointClamp, uv).r;
         float sceneZ = (unity_OrthoParams.w == 0) ? LinearEyeDepth(rawDepth, _ZBufferParams) : LinearDepthToEyeDepth(rawDepth);
         float thisZ = LinearEyeDepth(projection.z / projection.w, _ZBufferParams);
         fade = saturate(far * ((sceneZ - near) - thisZ));
@@ -102,13 +103,13 @@ float SoftParticles(float near, float far, ParticleParams params)
     {
         float2 uv = params.projectedPosition.xy / params.projectedPosition.w;
 
-        float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
+        float rawDepth = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_PointClamp, uv).r;
         float sceneZ = (unity_OrthoParams.w == 0) ? LinearEyeDepth(rawDepth, _ZBufferParams) : LinearDepthToEyeDepth(rawDepth);
         float thisZ = LinearEyeDepth(params.positionWS.xyz, GetWorldToViewMatrix());
         fade = saturate(far * ((sceneZ - near) - thisZ));
     }
     return fade;
-}*/
+}
 
 // Camera fade - returns alpha value for fading particles based on camera distance
 half CameraFade(float near, float far, float4 projection)
