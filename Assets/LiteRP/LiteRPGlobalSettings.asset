@@ -29,6 +29,7 @@ MonoBehaviour:
       - rid: 1967624824465391677
       - rid: 5246156137687678976
       - rid: 5246156137687678977
+      - rid: 5740693283300966400
     m_RuntimeSettings:
       m_List: []
   m_AssetVersion: 0
@@ -155,3 +156,9 @@ MonoBehaviour:
           - {r: 0.5, g: 0, b: 0.5, a: 1}
           - {r: 0.5, g: 0.5, b: 0.5, a: 1}
           - {r: 0, g: 0, b: 1, a: 1}
+    - rid: 5740693283300966400
+      type: {class: RenderingDebuggerRuntimeResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_version: 0
+        m_DebugUIHandlerCanvasPrefab: {fileID: 1153602445894428, guid: cf6cbdd672089a84796e55a21fed1cbe, type: 3}
+        m_DebugUIPersistentCanvasPrefab: {fileID: 1822588063230394, guid: f6b1a0fe75d5009449cf55ae76220e2b, type: 3}
