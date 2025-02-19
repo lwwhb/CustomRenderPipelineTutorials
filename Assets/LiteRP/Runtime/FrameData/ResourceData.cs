@@ -5,6 +5,11 @@ namespace LiteRP.FrameData
 {
     public abstract class ResourceData : ContextItem
     {
+        internal enum ActiveID
+        {
+            FrontBuffer,
+            BackBuffer
+        }
         internal bool isAccessible { get; set; }
 
         internal void InitFrame()

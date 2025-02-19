@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
 
@@ -173,11 +174,12 @@ namespace LiteRP
             TextureSizeMode textureSizeMode = TextureSizeMode.Explicit, int anisoLevel = 1, float mipMapBias = 0,
             FilterMode filterMode = FilterMode.Point, TextureWrapMode wrapMode = TextureWrapMode.Clamp, string name = "")
         {
+            var format = (desc.depthStencilFormat != GraphicsFormat.None) ? desc.depthStencilFormat : desc.graphicsFormat;
+
             TextureDesc rgDesc = new TextureDesc(desc.width, desc.height);
             rgDesc.sizeMode = textureSizeMode;
             rgDesc.slices = desc.volumeDepth;
-            rgDesc.depthBufferBits = (DepthBits)desc.depthBufferBits;
-            rgDesc.colorFormat = desc.graphicsFormat;
+            rgDesc.format = format;
             rgDesc.filterMode = filterMode;
             rgDesc.wrapMode = wrapMode;
             rgDesc.dimension = desc.dimension;
@@ -193,6 +195,7 @@ namespace LiteRP
             rgDesc.memoryless = RenderTextureMemoryless.None;
             rgDesc.vrUsage = VRTextureUsage.None;
             rgDesc.name = name;
+            rgDesc.enableShadingRate = desc.enableShadingRate;
 
             return rgDesc;
         }

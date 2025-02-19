@@ -24,10 +24,10 @@ namespace LiteRP
                 //RenderGraph引用不透明渲染列表
                 builder.UseRendererList(passData.opaqueRendererListHandle);
 
-                if (renderTargetData.backBufferColor.IsValid())
-                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
-                if (renderTargetData.backBufferDepth.IsValid())
-                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Write);
+                if (renderTargetData.activeColorTexture.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.activeColorTexture, 0, AccessFlags.Write);
+                if (renderTargetData.activeDepthTexture.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.activeDepthTexture, AccessFlags.Write);
                 
                 //设置主光源阴影
                 if (renderTargetData.mainLightShadow.IsValid())

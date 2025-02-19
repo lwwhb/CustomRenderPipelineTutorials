@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 using UnityEngine.Rendering.RenderGraphModule;
 
 namespace LiteRP.FrameData
@@ -24,6 +24,53 @@ namespace LiteRP.FrameData
         }
         
         ///---RT纹理资源
+        
+        //激活的Color target ID
+        internal ActiveID activeColorID { get; set; }
+
+        //激活的颜色纹理资源
+        public TextureHandle activeColorTexture
+        {
+            get
+            {
+                if (!CheckAndWarnAboutAccessibility())
+                    return TextureHandle.nullHandle;
+
+                switch (activeColorID)
+                {
+                    case ActiveID.FrontBuffer:
+                        return frontBufferColor;
+                    case ActiveID.BackBuffer:
+                        return backBufferColor;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        //激活的Depth target ID
+        internal ActiveID activeDepthID { get; set; }
+        
+        //激活的深度纹理资源
+        public TextureHandle activeDepthTexture
+        {
+            get
+            {
+                if (!CheckAndWarnAboutAccessibility())
+                    return TextureHandle.nullHandle;
+
+                switch (activeDepthID)
+                {
+                    case ActiveID.FrontBuffer:
+                        return frontBufferDepth;
+                    case ActiveID.BackBuffer:
+                        return backBufferDepth;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+        
         // 用于直接渲染到屏幕的后备颜色缓冲区。根据帧设置，所有RenderGraphPass都可以写入它。
         public TextureHandle backBufferColor
         {
@@ -40,6 +87,22 @@ namespace LiteRP.FrameData
         }
         private TextureHandle _backBufferDepth;
         
+        // 用于相机的颜色与深度的前端缓冲区。
+        public TextureHandle frontBufferColor
+        {
+            get => GetTextureHandle(ref _frontBufferColor);
+            internal set => SetTextureHandle(ref _frontBufferColor, value);
+        }
+        private TextureHandle _frontBufferColor;
+        
+        public TextureHandle frontBufferDepth
+        {
+            get => GetTextureHandle(ref _frontBufferDepth);
+            internal set => SetTextureHandle(ref _frontBufferDepth, value);
+        }
+        private TextureHandle _frontBufferDepth;
+        //---
+        
         // 用于主光源阴影渲染
         public TextureHandle mainLightShadow
         {
@@ -53,6 +116,9 @@ namespace LiteRP.FrameData
         {
             _backBufferColor = TextureHandle.nullHandle;
             _backBufferDepth = TextureHandle.nullHandle;
+            
+            _frontBufferColor = TextureHandle.nullHandle;
+            _frontBufferDepth = TextureHandle.nullHandle;
             
             _mainLightShadow = TextureHandle.nullHandle;
         }

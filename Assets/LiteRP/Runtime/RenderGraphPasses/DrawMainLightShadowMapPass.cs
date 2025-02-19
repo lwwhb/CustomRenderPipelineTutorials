@@ -8,8 +8,7 @@ namespace LiteRP
     public partial class LiteRPRenderGraphRecorder
     {
         private static readonly ProfilingSampler s_DrawMainLightShadowMapProfilingSampler = new ProfilingSampler("DrawMainLightShadowMapPass");
-        private const string k_MainLightShadowmapTextureName = "_MainLightShadowmap";
-        private RTHandle m_MainLightShadowmapTexture = null;
+        private RenderTextureDescriptor m_MainLightShadowDescriptor;
         private const int k_MaxCascades = 4;
         private const int k_ShadowmapBufferBits = 16;
         
@@ -87,15 +86,20 @@ namespace LiteRP
                     m_CascadeSlices[cascadeIndex] = sliceData;
                 }
             }
-            ShadowUtils.ShadowRTReAllocateIfNeeded(ref m_MainLightShadowmapTexture, shadowData.mainLightRenderTargetWidth,
-                shadowData.mainLightRenderTargetHeight, k_ShadowmapBufferBits, name: k_MainLightShadowmapTextureName);
 
+            UpdateShadowTextureDescriptorIfNeeded(shadowData);
             return true;
         }
-
-        private void ReleaseMainLightShadowMapPass()
+        
+        private void UpdateShadowTextureDescriptorIfNeeded(ShadowData shadowData)
         {
-            m_MainLightShadowmapTexture?.Release();
+            if (   m_MainLightShadowDescriptor.width != shadowData.mainLightShadowmapWidth
+                   || m_MainLightShadowDescriptor.height != shadowData.mainLightShadowmapHeight
+                   || m_MainLightShadowDescriptor.depthBufferBits != k_ShadowmapBufferBits
+                   || m_MainLightShadowDescriptor.colorFormat != RenderTextureFormat.Shadowmap)
+            {
+                m_MainLightShadowDescriptor = new RenderTextureDescriptor(shadowData.mainLightShadowmapWidth, shadowData.mainLightShadowmapHeight, RenderTextureFormat.Shadowmap, k_ShadowmapBufferBits);
+            }
         }
         
         private void AddDrawMainLightShadowMapPass(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData, LightData lightData, ShadowData shadowData)
@@ -110,7 +114,7 @@ namespace LiteRP
                 
                 //创建RendererList
                 var settings = new ShadowDrawingSettings(cameraData.cullingResults, passData.mainLightIndex);
-                settings.useRenderingLayerMaskTest = false; //临时代码
+                settings.useRenderingLayerMaskTest = false; //lwwhb 临时代码
                 for (int cascadeIndex = 0; cascadeIndex < shadowData.mainLightShadowCascadesCount; ++cascadeIndex)
                 {
                     passData.shadowRendererListsHandle[cascadeIndex] = renderGraph.CreateShadowRendererList(ref settings);
@@ -118,7 +122,7 @@ namespace LiteRP
                 }
                 
                 renderTargetData.mainLightShadow = LiteRPRenderGraphUtils.CreateRenderGraphTexture(renderGraph,
-                    m_MainLightShadowmapTexture.rt.descriptor, k_MainLightShadowmapTextureName, true,
+                    m_MainLightShadowDescriptor, ShaderPropertyName.mainLightShadowmapName, true, Color.black,
                     ShadowUtils.m_ForceShadowPointSampling ? FilterMode.Point : FilterMode.Bilinear);
                 if (renderTargetData.mainLightShadow.IsValid())
                     builder.SetRenderAttachmentDepth(renderTargetData.mainLightShadow, AccessFlags.Write);

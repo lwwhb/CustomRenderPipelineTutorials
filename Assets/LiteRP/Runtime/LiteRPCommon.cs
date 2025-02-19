@@ -1,7 +1,45 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace LiteRP
 {
+    public enum DepthFormat
+    {
+        /// <summary>
+        /// Default format for Android and Switch platforms is <see cref="GraphicsFormat.D24_UNorm_S8_UInt"/> and <see cref="GraphicsFormat.D32_SFloat_S8_UInt"/> for other platforms
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// Format containing 16 unsigned normalized bits in depth component. Corresponds to <see cref="GraphicsFormat.D16_UNorm"/>.
+        /// </summary>
+        Depth_16 = GraphicsFormat.D16_UNorm,
+
+        /// <summary>
+        /// Format containing 24 unsigned normalized bits in depth component. Corresponds to <see cref="GraphicsFormat.D24_UNorm"/>.
+        /// </summary>
+        Depth_24 = GraphicsFormat.D24_UNorm,
+
+        /// <summary>
+        /// Format containing 32 signed float bits in depth component. Corresponds to <see cref="GraphicsFormat.D32_SFloat"/>.
+        /// </summary>
+        Depth_32 = GraphicsFormat.D32_SFloat,
+
+        /// <summary>
+        /// Format containing 16 unsigned normalized bits in depth component and 8 unsigned integer bits in stencil. Corresponds to <see cref="GraphicsFormat.D16_UNorm_S8_UInt"/>.
+        /// </summary>
+        Depth_16_Stencil_8 = GraphicsFormat.D16_UNorm_S8_UInt,
+
+        /// <summary>
+        /// Format containing 24 unsigned normalized bits in depth component and 8 unsigned integer bits in stencil. Corresponds to <see cref="GraphicsFormat.D24_UNorm_S8_UInt"/>.
+        /// </summary>
+        Depth_24_Stencil_8 = GraphicsFormat.D24_UNorm_S8_UInt,
+
+        /// <summary>
+        /// Format containing 32 signed float bits in depth component and 8 unsigned integer bits in stencil. Corresponds to <see cref="GraphicsFormat.D32_SFloat_S8_UInt"/>.
+        /// </summary>
+        Depth_32_Stencil_8 = GraphicsFormat.D32_SFloat_S8_UInt,
+    }
     /// <summary>
     /// Options for setting MSAA Quality.
     /// This defines how many samples URP computes per pixel for evaluating the effect.

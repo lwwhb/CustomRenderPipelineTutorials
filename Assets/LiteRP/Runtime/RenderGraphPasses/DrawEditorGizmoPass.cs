@@ -25,10 +25,10 @@ namespace LiteRP
             using (var builder = renderGraph.AddRasterRenderPass<DrawEditorGizmoPassData>(passName, out var passData,
                        s_DrawEditorGizmoProfilingSampler))
             {
-                if (renderTargetData.backBufferColor.IsValid())
-                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
-                if (renderTargetData.backBufferDepth.IsValid())
-                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Read);
+                if (renderTargetData.activeColorTexture.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.activeColorTexture, 0, AccessFlags.Write);
+                if (renderTargetData.activeDepthTexture.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.activeDepthTexture, AccessFlags.Read);
 
                 passData.gizmoRendererListHandle = renderGraph.CreateGizmoRendererList(cameraData.camera, gizmoSubset);
                 builder.UseRendererList(passData.gizmoRendererListHandle);

@@ -242,7 +242,7 @@ namespace LiteRP
         
         // Default Materials
         #region Materials
-        Material GetMaterial(DefaultMaterialType materialType)
+        Material GetDefaultMaterial(DefaultMaterialType materialType)
         {
 #if UNITY_EDITOR
             if (GraphicsSettings.TryGetRenderPipelineSettings<LiteRPEditorMaterials>(out var defaultMaterials))
@@ -264,18 +264,18 @@ namespace LiteRP
         /// Returns the default Material.
         /// </summary>
         /// <returns>Returns the default Material.</returns>
-        public override Material defaultMaterial => GetMaterial(DefaultMaterialType.Default);
+        public override Material defaultMaterial => GetDefaultMaterial(DefaultMaterialType.Default);
         /// <summary>
         /// Returns the default particle Material.
         /// </summary>
         /// <returns>Returns the default particle Material.</returns>
-        public override Material defaultParticleMaterial => GetMaterial(DefaultMaterialType.Particle);
+        public override Material defaultParticleMaterial => GetDefaultMaterial(DefaultMaterialType.Particle);
 
         /// <summary>
         /// Returns the default line Material.
         /// </summary>
         /// <returns>Returns the default line Material.</returns>
-        public override Material defaultLineMaterial => GetMaterial(DefaultMaterialType.Particle);
+        public override Material defaultLineMaterial => GetDefaultMaterial(DefaultMaterialType.Particle);
         #endregion
         
         

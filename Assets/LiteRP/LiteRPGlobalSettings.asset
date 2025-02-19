@@ -29,12 +29,16 @@ MonoBehaviour:
       - rid: 1967624824465391677
       - rid: 5246156137687678976
       - rid: 5246156137687678977
+      - rid: -2
+      - rid: 5740693373722558516
     m_RuntimeSettings:
       m_List: []
   m_AssetVersion: 0
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 1967624824465391666
       type: {class: GPUResidentDrawerResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.GPUDriven.Runtime}
       data:
@@ -155,3 +159,10 @@ MonoBehaviour:
           - {r: 0.5, g: 0, b: 0.5, a: 1}
           - {r: 0.5, g: 0.5, b: 0.5, a: 1}
           - {r: 0, g: 0, b: 1, a: 1}
+    - rid: 5740693373722558516
+      type: {class: LiteRPRuntimeShaders, ns: LiteRP, asm: LiteRP}
+      data:
+        m_CopyDepthPS: {fileID: 4800000, guid: ff95359e0b5e8435f9a2e8f6eaa4de35, type: 3}
+        m_CoreBlitPS: {fileID: 4800000, guid: 9d0d0f758550e49149827f43523433f8, type: 3}
+        m_BlitHDROverlay: {fileID: 4800000, guid: 7d84024cd9e174ab480b7514b99d61f6, type: 3}
+        m_SamplingPS: {fileID: 4800000, guid: ade04ef0246574aad8d152e9f99ac4fe, type: 3}

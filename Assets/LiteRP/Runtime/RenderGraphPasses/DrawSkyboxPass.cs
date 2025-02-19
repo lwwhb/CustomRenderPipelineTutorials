@@ -21,10 +21,10 @@ namespace LiteRP
                 passData.skyboxRenderListHandle = renderGraph.CreateSkyboxRendererList(cameraData.camera);
                 builder.UseRendererList(passData.skyboxRenderListHandle);
                 
-                if(renderTargetData.backBufferColor.IsValid())
-                    builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
-                if (renderTargetData.backBufferDepth.IsValid())
-                    builder.SetRenderAttachmentDepth(renderTargetData.backBufferDepth, AccessFlags.Write);
+                if(renderTargetData.activeColorTexture.IsValid())
+                    builder.SetRenderAttachment(renderTargetData.activeColorTexture, 0, AccessFlags.Write);
+                if (renderTargetData.activeDepthTexture.IsValid())
+                    builder.SetRenderAttachmentDepth(renderTargetData.activeDepthTexture, AccessFlags.Write);
                 
                 builder.AllowPassCulling(false);
                 

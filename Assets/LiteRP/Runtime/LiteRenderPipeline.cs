@@ -157,6 +157,8 @@ namespace LiteRP
             bool anyShadowsEnabled = m_Asset.mainLightShadowEnabled;
             cameraData.maxShadowDistance = Mathf.Min(m_Asset.mainLightShadowDistance, camera.farClipPlane);
             cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ? cameraData.maxShadowDistance : 0.0f;
+            cameraData.cameraTargetDescriptor = LiteRPRenderGraphUtils.CreateRenderTextureDescriptor(camera, cameraData.scaledWidth, cameraData.scaledHeight, 
+                cameraData.isHdrEnabled, cameraData.hdrColorBufferPrecision, 1, Graphics.preserveFramebufferAlpha);
             // 初始化摄像机附加管线数据
             AdditionalCameraData additionalCameraData = null;
             camera.gameObject.TryGetComponent(out additionalCameraData);

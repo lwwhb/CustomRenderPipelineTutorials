@@ -84,7 +84,7 @@ namespace LiteRP
             if (arrayLength > 0 && index >= 0 && index < arrayLength)
                 return s_ShaderGUIDs[index];
 
-            Debug.LogError("Trying to access universal shader GUID out of bounds: (" + id + ": " + index + ")");
+            Debug.LogError("Trying to access shader GUID out of bounds: (" + id + ": " + index + ")");
             return "";
         }
 #endif

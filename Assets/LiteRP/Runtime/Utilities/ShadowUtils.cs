@@ -257,51 +257,6 @@ namespace LiteRP
             return resolution;
         }
         
-        public static bool ShadowRTReAllocateIfNeeded(ref RTHandle handle, int width, int height, int bits, int anisoLevel = 1, float mipMapBias = 0, string name = "")
-        {
-            if (ShadowRTNeedsReAlloc(handle, width, height, bits, anisoLevel, mipMapBias, name))
-            {
-                handle?.Release();
-                handle = AllocShadowRT(width, height, bits, anisoLevel, mipMapBias, name);
-                return true;
-            }
-            return false;
-        }
-        
-        public static bool ShadowRTNeedsReAlloc(RTHandle handle, int width, int height, int bits, int anisoLevel, float mipMapBias, string name)
-        {
-            if (handle == null || handle.rt == null)
-                return true;
-            var descriptor = GetTemporaryShadowTextureDescriptor(width, height, bits);
-            if (m_ForceShadowPointSampling)
-            {
-                if (handle.rt.filterMode != FilterMode.Point)
-                    return true;
-            }
-            else
-            {
-                if (handle.rt.filterMode != FilterMode.Bilinear)
-                    return true;
-            }
-
-            TextureDesc shadowDesc = RTHandleResourcePool.CreateTextureDesc(descriptor, TextureSizeMode.Explicit, anisoLevel, mipMapBias, m_ForceShadowPointSampling ? FilterMode.Point : FilterMode.Bilinear, TextureWrapMode.Clamp, name);
-            return RenderingUtils.RTHandleNeedsReAlloc(handle, shadowDesc, false);
-        }
-        
-        public static RTHandle AllocShadowRT(int width, int height, int bits, int anisoLevel, float mipMapBias, string name)
-        {
-            var rtd = GetTemporaryShadowTextureDescriptor(width, height, bits);
-            return RTHandles.Alloc(rtd, m_ForceShadowPointSampling ? FilterMode.Point : FilterMode.Bilinear, TextureWrapMode.Clamp, isShadowMap: true, name: name);
-        }
-        
-        private static RenderTextureDescriptor GetTemporaryShadowTextureDescriptor(int width, int height, int bits)
-        {
-            var format = GraphicsFormatUtility.GetDepthStencilFormat(bits, 0);
-            RenderTextureDescriptor rtd = new RenderTextureDescriptor(width, height, GraphicsFormat.None, format);
-            rtd.shadowSamplingMode = RenderingUtils.SupportsRenderTextureFormat(RenderTextureFormat.Shadowmap) ? ShadowSamplingMode.CompareDepths : ShadowSamplingMode.None;
-            return rtd;
-        }
-        
         public static Vector4 GeMainLightShadowBias(ref VisibleLight shadowLight, Vector4 mainLightShadowBias, bool supportsSoftShadows, Matrix4x4 lightProjectionMatrix, float shadowResolution)
         {
             float frustumSize;

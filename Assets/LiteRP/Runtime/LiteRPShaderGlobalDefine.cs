@@ -16,6 +16,8 @@ namespace LiteRP
 
         public const string AdditionalLights = "_ADDITIONAL_LIGHTS";                    //使用辅助光源
         
+        public const string EnableAlphaOutput = "_ENABLE_ALPHA_OUTPUT";                 //开启Alpha输出
+        
         //Material Keyword String
         public const string AlphaTestOn = "_ALPHATEST_ON";                            //AlphaTest开启
         public const string AlphaPreMultiplyOn = "_ALPHAPREMULTIPLY_ON";              //Alpha预乘开启
@@ -52,6 +54,8 @@ namespace LiteRP
         
         public static GlobalKeyword AdditionalLights;
         
+        public static GlobalKeyword EnableAlphaOutput;
+        
         public static void InitializeShaderGlobalKeywords()
         {
             MainLightShadows = GlobalKeyword.Create(ShaderKeywordStrings.MainLightShadows);
@@ -63,6 +67,8 @@ namespace LiteRP
             SoftShadowsHigh = GlobalKeyword.Create(ShaderKeywordStrings.SoftShadowsHigh);
 
             AdditionalLights = GlobalKeyword.Create(ShaderKeywordStrings.AdditionalLights);
+            
+            EnableAlphaOutput = GlobalKeyword.Create(ShaderKeywordStrings.EnableAlphaOutput);
         }
     }
 
@@ -83,6 +89,11 @@ namespace LiteRP
         public static readonly string zBufferParams = "_ZBufferParams";
         public static readonly string orthoParams = "unity_OrthoParams";
         //public static readonly string globalMipBias = "_GlobalMipBias";
+        
+        public static readonly string backBufferColorTextureName = "_BackBufferColor";
+        public static readonly string backBufferDepthTextureName = "_BackBufferDepth";
+        public static readonly string cameraColorAttachmentName = "_CameraColorAttachment";
+        public static readonly string cameraDepthAttachmentName = "_CameraDepthAttachment";
         
         // SetupLightsPass Const Buffer Begin
         public static readonly string mainLightPositionName = "_MainLightPosition";   
@@ -116,6 +127,11 @@ namespace LiteRP
         // MainLightShadowMapPass Const Buffer Begin
         
         // MainLightShadowMapPass End
+        
+        // copy color and depth pass Begin
+        public static readonly string cameraColorTextureName = "_CameraColorTexture";
+        public static readonly string cameraDepthTextureName = "_CameraDepthTexture";
+        // copy color and depth pass End
     }
     internal static class ShaderPropertyId
     {   
@@ -136,6 +152,12 @@ namespace LiteRP
         public static readonly int zBufferParams = Shader.PropertyToID(ShaderPropertyName.zBufferParams);
         public static readonly int orthoParams = Shader.PropertyToID(ShaderPropertyName.orthoParams);
         //public static readonly int globalMipBias = Shader.PropertyToID(ShaderPropertyName.globalMipBias);
+        
+        // back buffer
+        public static readonly int backBufferColor = Shader.PropertyToID(ShaderPropertyName.backBufferColorTextureName);
+        public static readonly int backBufferDepth = Shader.PropertyToID(ShaderPropertyName.backBufferDepthTextureName);
+        public static readonly int cameraColorAttachment = Shader.PropertyToID(ShaderPropertyName.cameraDepthAttachmentName);
+        public static readonly int cameraDepthAttachment = Shader.PropertyToID(ShaderPropertyName.cameraDepthAttachmentName);
         
         // SetupLightsPass Const Buffer Begin
         public static readonly int mainLightPosition = Shader.PropertyToID(ShaderPropertyName.mainLightPositionName);
@@ -189,5 +211,10 @@ namespace LiteRP
         public static readonly int shC = Shader.PropertyToID("liteRP_SHC");
         
         // glossy and ambient End
+        
+        // copy color and depth pass Begin
+        public static readonly int cameraColorTexture = Shader.PropertyToID(ShaderPropertyName.cameraColorTextureName);
+        public static readonly int cameraDepthTexture = Shader.PropertyToID(ShaderPropertyName.cameraDepthTextureName);
+        // copy color and depth pass End
     }
 }
