@@ -118,7 +118,6 @@ namespace LiteRP
         private void CreateRenderGraphCameraRenderTargets(RenderGraph renderGraph, RenderTargetData renderTargetData, CameraData cameraData)
         {
             m_RequiresIntermediateAttachments = RequiresIntermediateAttachments(cameraData);
-            m_RequiresIntermediateAttachments = false;
             
             var targetTexture = cameraData.camera.targetTexture;
             var cameraTargetTexture = targetTexture;

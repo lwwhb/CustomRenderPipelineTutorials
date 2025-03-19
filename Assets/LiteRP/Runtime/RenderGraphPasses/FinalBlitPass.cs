@@ -61,13 +61,13 @@ namespace LiteRP
                 }
                 
                 passData.sourceColor = renderTargetData.frontBufferColor;
-                builder.UseTexture(renderTargetData.frontBufferColor, AccessFlags.Read);
                 passData.destTarget = renderTargetData.backBufferColor;
                 passData.enableAlphaOutput = GraphicsFormatUtility.HasAlphaChannel(cameraData.cameraTargetDescriptor.graphicsFormat);
                 passData.blitMaterialData = m_BlitMaterialData[(int)BlitType.Core];     // lwwhb 暂时不支持HDR Output
                 passData.cameraData = cameraData;
+                
                 builder.SetRenderAttachment(renderTargetData.backBufferColor, 0, AccessFlags.Write);
-
+                builder.UseTexture(renderTargetData.frontBufferColor, AccessFlags.Read);
                 //设置渲染全局状态
                 builder.AllowPassCulling(false);
                 builder.AllowGlobalStateModification(true);
@@ -86,7 +86,7 @@ namespace LiteRP
                     CoreUtils.SetKeyword(data.blitMaterialData.material, ShaderKeywordStrings.EnableAlphaOutput, data.enableAlphaOutput);
                     RTHandle source = data.sourceColor;
                     int shaderPassIndex = source.rt?.filterMode == FilterMode.Bilinear ? data.blitMaterialData.bilinearSamplerPass : data.blitMaterialData.nearestSamplerPass;
-                    Blitter.BlitTexture(context.cmd, data.sourceColor, scaleBias, data.blitMaterialData.material, shaderPassIndex);
+                    Blitter.BlitTexture(context.cmd, source, scaleBias, data.blitMaterialData.material, shaderPassIndex);
                 });
             }
         }
